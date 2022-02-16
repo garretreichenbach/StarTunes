@@ -15,7 +15,8 @@ public class ConfigManager {
     private static FileConfiguration mainConfig;
     public static final String[] defaultMainConfig = {
             "debug-mode: false",
-            "max-world-logs: 5"
+            "max-world-logs: 5",
+            "music-volume: 5"
     };
 
     //Key Config

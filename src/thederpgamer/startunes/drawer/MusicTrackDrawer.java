@@ -39,14 +39,8 @@ public class MusicTrackDrawer extends GUIElement {
     @Override
     public void update(Timer timer) {
         fadeTimer -= timer.getDelta();
-        if(fadeTimer <= 0) {
-            if(nowPlayingOverlay != null) nowPlayingOverlay.cleanUp();
-            if(trackOverlay != null) trackOverlay.cleanUp();
-            if(artistOverlay != null) artistOverlay.cleanUp();
-            nowPlayingOverlay = null;
-            trackOverlay = null;
-            artistOverlay = null;
-        } else { //Todo: Add setting to not fade out
+        if(fadeTimer <= 0) cleanUp();
+        else { //Todo: Add setting to not fade out
             if(nowPlayingOverlay != null) nowPlayingOverlay.getColor().a -= 0.0015f;
             if(trackOverlay != null) trackOverlay.getColor().a -= 0.0015f;
             if(artistOverlay != null) artistOverlay.getColor().a -= 0.0015f;
@@ -55,7 +49,12 @@ public class MusicTrackDrawer extends GUIElement {
 
     @Override
     public void cleanUp() {
-
+        if(nowPlayingOverlay != null) nowPlayingOverlay.cleanUp();
+        if(trackOverlay != null) trackOverlay.cleanUp();
+        if(artistOverlay != null) artistOverlay.cleanUp();
+        nowPlayingOverlay = null;
+        trackOverlay = null;
+        artistOverlay = null;
     }
 
     @Override
@@ -64,12 +63,7 @@ public class MusicTrackDrawer extends GUIElement {
     }
 
     public void setCurrentTrack(String name, String artist) {
-        if(nowPlayingOverlay != null) nowPlayingOverlay.cleanUp();
-        if(trackOverlay != null) trackOverlay.cleanUp();
-        if(artistOverlay != null) artistOverlay.cleanUp();
-        nowPlayingOverlay = null;
-        trackOverlay = null;
-        artistOverlay = null;
+        cleanUp();
 
         nowPlayingOverlay = new GUITextOverlay(10, 10, GameClient.getClientState());
         nowPlayingOverlay.orientate(GUIElement.ORIENTATION_TOP | GUIElement.ORIENTATION_LEFT);

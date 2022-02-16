@@ -21,6 +21,12 @@ public class DateUtils {
         return getAgeDays(new Date(time));
     }
 
+    public static String getRunTime(int seconds) {
+        int minutes = (seconds % 3600) / 60;
+        seconds = seconds % 60;
+        return String.format("%02d:%02d", minutes, seconds);
+    }
+
     public static String getTimeFormatted(String format) {
         return (new SimpleDateFormat(format)).format(new Date());
     }
