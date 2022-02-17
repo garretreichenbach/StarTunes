@@ -22,17 +22,25 @@ public class GUIMinMaxSetting extends AbstractSizeSetting {
 
     @Override
     public void dec() {
+        int old = setting;
         setting = Math.max(min, setting - 1);
-        MusicManager.musicVolume = setting;
-        ConfigManager.getMainConfig().set("music-volume", MusicManager.musicVolume);
+        if(setting != old) {
+            MusicManager.musicVolume = setting;
+            ConfigManager.getMainConfig().set("music-volume", MusicManager.musicVolume);
+            ConfigManager.getMainConfig().saveConfig();
+        }
         if (guiCallBack != null) guiCallBack.settingChanged(setting);
     }
 
     @Override
     public void inc() {
+        int old = setting;
         setting = Math.min(max, setting + 1);
-        MusicManager.musicVolume = setting;
-        ConfigManager.getMainConfig().set("music-volume", MusicManager.musicVolume);
+        if(setting != old) {
+            MusicManager.musicVolume = setting;
+            ConfigManager.getMainConfig().set("music-volume", MusicManager.musicVolume);
+            ConfigManager.getMainConfig().saveConfig();
+        }
         if (guiCallBack != null) guiCallBack.settingChanged(setting);
     }
 

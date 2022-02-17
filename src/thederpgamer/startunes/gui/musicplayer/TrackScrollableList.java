@@ -5,7 +5,6 @@ import org.schema.schine.graphicsengine.core.MouseEvent;
 import org.schema.schine.graphicsengine.forms.gui.*;
 import org.schema.schine.graphicsengine.forms.gui.newgui.*;
 import org.schema.schine.input.InputState;
-import thederpgamer.startunes.StarTunes;
 import thederpgamer.startunes.manager.LogManager;
 import thederpgamer.startunes.manager.MusicManager;
 import thederpgamer.startunes.manager.ResourceManager;
@@ -38,7 +37,7 @@ public class TrackScrollableList extends ScrollableTableList<String> {
         buttonPane.onInit();
 
         if(panel.currentTrack != null && panel.currentTrack.equals(entry)) {
-            buttonPane.addButton(0, 0, "STOP", GUIHorizontalArea.HButtonColor.ORANGE, new GUICallback() {
+            buttonPane.addButton(0, 0, "STOP", GUIHorizontalArea.HButtonColor.RED, new GUICallback() {
                 @Override
                 public void callback(GUIElement guiElement, MouseEvent mouseEvent) {
                     if(mouseEvent.pressedLeftMouse()) {
@@ -71,12 +70,7 @@ public class TrackScrollableList extends ScrollableTableList<String> {
                 @Override
                 public void callback(GUIElement guiElement, MouseEvent mouseEvent) {
                     if(mouseEvent.pressedLeftMouse()) {
-                        Controller.getAudioManager().playBackgroundMusic(getTrackName(entry), MusicManager.musicVolume);
-                        StarTunes.getInstance().trackDrawer.setCurrentTrack(getTrackName(entry), getArtistName(entry));
-                        panel.currentTrack = entry;
-                        panel.runTimer = getRunTimeMS(getRunTime(entry));
-                        panel.trackLength = getRunTimeMS(getRunTime(entry));
-                        LogManager.logInfo("Now playing: " + entry);
+                        MusicManager.setCurrentTrack(entry);
                         panel.recreateTabs();
                     }
                 }
@@ -98,7 +92,7 @@ public class TrackScrollableList extends ScrollableTableList<String> {
             });
         }
 
-        buttonPane.addButton(1, 0, "AUTOPLAY SETTINGS", GUIHorizontalArea.HButtonColor.BLUE, new GUICallback() {
+        buttonPane.addButton(1, 0, "AUTOPLAY SETTINGS", GUIHorizontalArea.HButtonColor.PINK, new GUICallback() {
             @Override
             public void callback(GUIElement guiElement, MouseEvent mouseEvent) {
                 if(mouseEvent.pressedLeftMouse()) { //Todo
