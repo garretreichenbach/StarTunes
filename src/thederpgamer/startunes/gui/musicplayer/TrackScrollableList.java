@@ -7,7 +7,6 @@ import org.schema.schine.graphicsengine.forms.gui.newgui.*;
 import org.schema.schine.input.InputState;
 import thederpgamer.startunes.manager.LogManager;
 import thederpgamer.startunes.manager.MusicManager;
-import thederpgamer.startunes.manager.ResourceManager;
 import thederpgamer.startunes.utils.DateUtils;
 
 import java.util.Collection;
@@ -121,7 +120,8 @@ public class TrackScrollableList extends ScrollableTableList<String> {
 
     @Override
     protected Collection<String> getElementList() {
-        return ResourceManager.musicMap.keySet();
+        if(MusicManager.playList.isEmpty()) MusicManager.initializePlayList();
+        return MusicManager.playList.values();
     }
 
     @Override

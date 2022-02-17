@@ -74,6 +74,9 @@ public class MusicManager {
             playList.put(i, track);
             i ++;
         }
+        try {
+            StarTunes.getInstance().musicControlManager.getMenuPanel().sortPlayList(playList);
+        } catch(Exception ignored) {}
     }
 
     public static void setLoop(boolean loop) {
@@ -117,19 +120,19 @@ public class MusicManager {
         }
     }
 
-    private static String getTrackName(String entry) {
+    public static String getTrackName(String entry) {
         return entry.split(" - ")[0].trim();
     }
 
-    private static String getArtistName(String entry) {
+    public static String getArtistName(String entry) {
         return entry.split(" - ")[1].trim();
     }
 
-    private static int getRunTime(String entry) {
+    public static int getRunTime(String entry) {
         return Integer.parseInt(entry.split(" - ")[2].trim());
     }
 
-    private static long getRunTimeMS(int runTime) {
+    public static long getRunTimeMS(int runTime) {
         return runTime * 1000L;
     }
 }

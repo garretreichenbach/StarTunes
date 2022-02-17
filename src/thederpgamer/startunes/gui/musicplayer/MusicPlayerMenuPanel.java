@@ -11,9 +11,14 @@ import org.schema.schine.graphicsengine.forms.gui.newgui.GUIHorizontalArea;
 import org.schema.schine.graphicsengine.forms.gui.newgui.GUIHorizontalButtonTablePane;
 import org.schema.schine.graphicsengine.forms.gui.newgui.GUIHorizontalProgressBar;
 import org.schema.schine.input.InputState;
+import thederpgamer.startunes.data.TrackSortData;
 import thederpgamer.startunes.manager.ConfigManager;
 import thederpgamer.startunes.manager.MusicManager;
 import thederpgamer.startunes.utils.DateUtils;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * <Description>
@@ -23,6 +28,10 @@ import thederpgamer.startunes.utils.DateUtils;
  */
 public class MusicPlayerMenuPanel extends GUIMenuPanel {
 
+    public static final int NAME = 0;
+    public static final int ARTIST = 1;
+    public static final int RUNTIME = 2;
+
     public String currentTrack;
     public long trackLength;
     public long runTimer;
@@ -30,6 +39,7 @@ public class MusicPlayerMenuPanel extends GUIMenuPanel {
     private boolean shuffle = false;
 
     private GUIHorizontalProgressBar progressBar;
+    private TrackScrollableList trackList;
 
     public MusicPlayerMenuPanel(InputState inputState) {
         super(inputState, "MusicPlayerMenu", GLFrame.getWidth() / 2, GLFrame.getHeight() / 2);
@@ -108,7 +118,7 @@ public class MusicPlayerMenuPanel extends GUIMenuPanel {
         progressBarAnchor.getPos().y += currentTrackOverlay.getHeight() + 2;
         contentPane.setTextBoxHeight(0, (int) (progressBar.getHeight() + currentTrackOverlay.getHeight() + 8));
 
-        (new TrackScrollableList(getState(), contentPane.getContent(1), this)).onInit();
+        (trackList = new TrackScrollableList(getState(), contentPane.getContent(1), this)).onInit();
         contentPane.addNewTextBox(54);
 
         GUIHorizontalButtonTablePane buttonPane = new GUIHorizontalButtonTablePane(getState(), 3, 2, contentPane.getContent(2));
@@ -330,5 +340,70 @@ public class MusicPlayerMenuPanel extends GUIMenuPanel {
         float lengthSeconds = trackLength / 1000.0f;
         runTimer = (long) (((percent / 10) * lengthSeconds));
         MusicManager.setMusicTime(runTimer);
+    }
+
+    public void sortPlayList(ConcurrentHashMap<Integer, String> playList) {
+        if(trackList != null) {
+            int activeSort = trackList.activeSortColumnIndex;
+            switch(activeSort) {
+                case NAME:
+                    sortByName(playList);
+                    break;
+                case ARTIST:
+                    sortByArtist(playList);
+                    break;
+                case RUNTIME:
+                    sortByRunTime(playList);
+                    break;
+            }
+        }
+    }
+
+    private void sortByName(ConcurrentHashMap<Integer, String> playList) {
+        ConcurrentHashMap<String, String> temp = new ConcurrentHashMap<>();
+        ArrayList<String> trackNames = new ArrayList<>();
+        for(String track : playList.values()) {
+            trackNames.add(MusicManager.getTrackName(track));
+            temp.put(MusicManager.getTrackName(track), track);
+        }
+        Collections.sort(trackNames);
+        playList.clear();
+        int i = 0;
+        for(String trackName : trackNames) {
+            playList.put(i, temp.get(trackName));
+            i ++;
+        }
+    }
+
+    private void sortByArtist(ConcurrentHashMap<Integer, String> playList) {
+        ConcurrentHashMap<String, String> temp = new ConcurrentHashMap<>();
+        ArrayList<String> artistNames = new ArrayList<>();
+        for(String track : playList.values()) {
+            artistNames.add(MusicManager.getArtistName(track));
+            temp.put(MusicManager.getArtistName(track), track);
+        }
+        Collections.sort(artistNames);
+        playList.clear();
+        int i = 0;
+        for(String artistName : artistNames) {
+            playList.put(i, temp.get(artistName));
+            i ++;
+        }
+    }
+
+    private void sortByRunTime(ConcurrentHashMap<Integer, String> playList) {
+        ConcurrentHashMap<Integer, String> temp = new ConcurrentHashMap<>();
+        ArrayList<TrackSortData> sortDatas = new ArrayList<>();
+        for(String track : playList.values()) {
+            sortDatas.add(new TrackSortData(track, MusicManager.getRunTime(track)));
+            temp.put(MusicManager.getRunTime(track), track);
+        }
+        Collections.sort(sortDatas);
+        playList.clear();
+        int i = 0;
+        for(TrackSortData sortData : sortDatas) {
+            playList.put(i, temp.get(sortData.runTime));
+            i ++;
+        }
     }
 }

@@ -77,8 +77,13 @@ public class ResourceManager {
                             LogManager.logWarning("Music file \"" + musicFile.getName() + "\" is not correctly formatted and cannot be loaded!", null);
                             continue;
                         }
-                        Controller.getAudioManager().addSound(fields[0], musicFile);
-                        musicMap.put(musicFile.getName().substring(0, musicFile.getName().lastIndexOf(".")), getAutoplaySettings(musicFile));
+
+                        String trackName = musicFile.getName().substring(0, musicFile.getName().lastIndexOf("."));
+                        if(!musicMap.containsKey(trackName)) {
+                            Controller.getAudioManager().addSound(fields[0], musicFile);
+                            musicMap.put(trackName, getAutoplaySettings(musicFile));
+                            LogManager.logInfo("Loaded music file \"" + musicFile.getName() + "\".");
+                        }
                     } catch(Exception exception) {
                         LogManager.logException("Failed to load music file \"" + musicFile.getName() + "\". Check to make sure the file name is formatted correctly and ends in .wav", exception);
                     }
@@ -96,8 +101,12 @@ public class ResourceManager {
                     LogManager.logWarning("Music file \"" + exportFile.getName() + "\" is not correctly formatted and cannot be loaded!\nCorrect format: <name> - <artist> - <runtimeSeconds>.wav", null);
                     continue;
                 }
-                Controller.getAudioManager().addSound(fields[0], exportFile);
-                musicMap.put(exportFile.getName().substring(0, exportFile.getName().lastIndexOf(".")), getAutoplaySettings(exportFile));
+                String trackName = exportFile.getName().substring(0, exportFile.getName().lastIndexOf("."));
+                if(!musicMap.containsKey(trackName)) {
+                    Controller.getAudioManager().addSound(fields[0], exportFile);
+                    musicMap.put(trackName, getAutoplaySettings(exportFile));
+                    LogManager.logInfo("Loaded music file \"" + exportFile.getName() + "\".");
+                }
             } catch(IOException exception) {
                 exception.printStackTrace();
             }
