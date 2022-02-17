@@ -146,8 +146,10 @@ public class ResourceManager {
         try {
             AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file);
             AudioFormat format = audioInputStream.getFormat();
-            long frames = audioInputStream.getFrameLength();
-            return (int) ((frames + 0.0) / format.getFrameRate());
+            long audioFileLength = file.length();
+            int frameSize = format.getFrameSize();
+            float frameRate = format.getFrameRate();
+            return (int) (audioFileLength / (frameSize * frameRate));
         } catch(Exception exception) {
             exception.printStackTrace();
         }

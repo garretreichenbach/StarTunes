@@ -30,7 +30,7 @@ public class MusicManager {
     public static SourceLWJGLOpenAL currentSource;
     public static final ConcurrentHashMap<Integer, String> playList = new ConcurrentHashMap<>();
     private static int trackIndex = 0;
-    public static boolean trackLoop;
+    public static boolean trackLoop = false;
     public static boolean trackShuffle = false;
 
     public static void setShuffle(boolean shuffle) {
