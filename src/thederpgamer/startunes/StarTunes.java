@@ -70,7 +70,7 @@ public class StarTunes extends StarMod {
 
     @Override
     public void onResourceLoad(ResourceLoader resourceLoader) {
-        ResourceManager.loadResources(this, resourceLoader);
+        ResourceManager.loadResources(this);
     }
 
     private void registerListeners() {

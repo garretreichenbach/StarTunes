@@ -1,14 +1,14 @@
 package thederpgamer.startunes.data;
 
+import java.util.HashMap;
+
 /**
  * <Description>
  *
  * @author TheDerpGamer
  * @version 1.0 - [02/16/2022]
  */
-public class TrackAutoplaySettings {
+public class TrackSettings {
 
-    public float combat;
-    public float exploration;
-    public float building;
+    public HashMap<String, TrackData> trackDataMap;
 }

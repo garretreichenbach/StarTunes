@@ -21,19 +21,27 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class MusicManager {
 
+    public static final int NAME = 0;
+    public static final int ARTIST = 1;
+    public static final int RUNTIME = 2;
+
+    public static int currentSort = NAME;
     public static int musicVolume;
     public static SourceLWJGLOpenAL currentSource;
     public static final ConcurrentHashMap<Integer, String> playList = new ConcurrentHashMap<>();
     private static int trackIndex = 0;
     public static boolean trackLoop;
+    public static boolean trackShuffle = false;
 
     public static void setShuffle(boolean shuffle) {
         initializePlayList();
-        if(shuffle) {
+        trackShuffle = shuffle;
+        if(trackShuffle) {
             ArrayList<String> temp = new ArrayList<>(playList.values());
             Collections.shuffle(temp);
             playList.clear();
             for(int i = 0; i < temp.size(); i ++) playList.put(i, temp.get(i));
+            StarTunes.getInstance().musicControlManager.getMenuPanel().recreateTabs();
         }
     }
 
@@ -129,7 +137,7 @@ public class MusicManager {
     }
 
     public static int getRunTime(String entry) {
-        return Integer.parseInt(entry.split(" - ")[2].trim());
+        return ResourceManager.musicMap.get(entry).runTime;
     }
 
     public static long getRunTimeMS(int runTime) {

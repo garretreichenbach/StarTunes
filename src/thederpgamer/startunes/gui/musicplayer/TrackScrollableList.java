@@ -121,12 +121,13 @@ public class TrackScrollableList extends ScrollableTableList<String> {
     @Override
     protected Collection<String> getElementList() {
         if(MusicManager.playList.isEmpty()) MusicManager.initializePlayList();
+        panel.sortPlayList(MusicManager.playList);
         return MusicManager.playList.values();
     }
 
     @Override
     public void initColumns() {
-        addColumn("Name", 15.0f, new Comparator<String>() {
+         addColumn("Name", 15.0f, new Comparator<String>() {
             @Override
             public int compare(String o1, String o2) {
                 return getTrackName(o1).compareTo(getTrackName(o2));
@@ -160,12 +161,15 @@ public class TrackScrollableList extends ScrollableTableList<String> {
                 return getArtistName(entry).toLowerCase().contains(s.toLowerCase());
             }
         }, "SEARCH BY ARTIST", ControllerElement.FilterRowStyle.RIGHT);
+        activeSortColumnIndex = MusicManager.currentSort;
     }
 
     @Override
     public void updateListEntries(GUIElementList guiElementList, Set<String> set) {
+        panel.sortPlayList(MusicManager.playList);
         guiElementList.deleteObservers();
         guiElementList.addObserver(this);
+
         for(String entry : set) {
             GUITextOverlayTable nameTextElement;
             if(panel.currentTrack != null && panel.currentTrack.equals(entry)) (nameTextElement = new GUITextOverlayTable(10, 10, this.getState())).setTextSimple(getTrackName(entry) + " (Playing)");
@@ -204,7 +208,7 @@ public class TrackScrollableList extends ScrollableTableList<String> {
     }
 
     private int getRunTime(String entry) {
-        return Integer.parseInt(entry.split(" - ")[2].trim());
+        return MusicManager.getRunTime(entry);
     }
 
     private long getRunTimeMS(int runTime) {

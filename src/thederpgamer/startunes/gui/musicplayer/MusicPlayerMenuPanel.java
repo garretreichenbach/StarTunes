@@ -28,10 +28,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class MusicPlayerMenuPanel extends GUIMenuPanel {
 
-    public static final int NAME = 0;
-    public static final int ARTIST = 1;
-    public static final int RUNTIME = 2;
-
     public String currentTrack;
     public long trackLength;
     public long runTimer;
@@ -344,17 +340,18 @@ public class MusicPlayerMenuPanel extends GUIMenuPanel {
 
     public void sortPlayList(ConcurrentHashMap<Integer, String> playList) {
         if(trackList != null) {
-            int activeSort = trackList.activeSortColumnIndex;
-            switch(activeSort) {
-                case NAME:
-                    sortByName(playList);
-                    break;
-                case ARTIST:
-                    sortByArtist(playList);
-                    break;
-                case RUNTIME:
-                    sortByRunTime(playList);
-                    break;
+            if(!MusicManager.trackShuffle) {
+                switch(MusicManager.currentSort) {
+                    case MusicManager.NAME:
+                        sortByName(playList);
+                        break;
+                    case MusicManager.ARTIST:
+                        sortByArtist(playList);
+                        break;
+                    case MusicManager.RUNTIME:
+                        sortByRunTime(playList);
+                        break;
+                }
             }
         }
     }
@@ -373,6 +370,7 @@ public class MusicPlayerMenuPanel extends GUIMenuPanel {
             playList.put(i, temp.get(trackName));
             i ++;
         }
+        MusicManager.currentSort = MusicManager.NAME;
     }
 
     private void sortByArtist(ConcurrentHashMap<Integer, String> playList) {
@@ -389,6 +387,7 @@ public class MusicPlayerMenuPanel extends GUIMenuPanel {
             playList.put(i, temp.get(artistName));
             i ++;
         }
+        MusicManager.currentSort = MusicManager.ARTIST;
     }
 
     private void sortByRunTime(ConcurrentHashMap<Integer, String> playList) {
@@ -405,5 +404,6 @@ public class MusicPlayerMenuPanel extends GUIMenuPanel {
             playList.put(i, temp.get(sortData.runTime));
             i ++;
         }
+        MusicManager.currentSort = MusicManager.RUNTIME;
     }
 }
