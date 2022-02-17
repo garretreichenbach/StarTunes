@@ -24,7 +24,19 @@ import java.util.HashMap;
 public class ResourceManager {
 
     public enum Music {
-        MAIN_THEME("StarMade Main Theme", "Daniel Tusjak", 248),
+        MAIN_THEME("Main Theme", "Daniel Tusjak", 248),
+        NEW_HORIZONS("New Horizons", "Daniel Tusjak", 233),
+        COLLAPSE("Collapse", "Daniel Tusjak", 105),
+        TRAILER_THEME("Trailer Theme", "Daniel Tusjak", 147),
+        DRIFTING_THROUGH_THE_NEBULA("Drifting Through The Nebula", "Daniel Tusjak", 336),
+        VOID("Void", "Daniel Tusjak", 352),
+        STARLIGHT("Starlight", "Daniel Tusjak", 188),
+        PRE_ACTION("Pre-action", "Daniel Tusjak", 111),
+        DETECTION("Detection", "Daniel Tusjak", 183),
+        CIVILIZATIONS("Civilizations", "Daniel Tusjak", 203),
+        A_SPACE_BETWEEN_WORLDS("A Space Between Worlds", "Daniel Tusjak", 290),
+        SERENITY("Serenity", "Daniel Tusjak", 186),
+        VOYAGE("Voyage", "Daniel Tusjak", 231),
         GREEN("Green", "Jontyfreack", 646),
         MOCHUR("Mochur", "Jontyfreack", 227),
         WANDERER("Wanderer", "Jontyfreack", 297),
