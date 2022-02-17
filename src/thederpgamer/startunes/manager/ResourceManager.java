@@ -1,7 +1,6 @@
 package thederpgamer.startunes.manager;
 
 import com.google.gson.Gson;
-import org.apache.commons.io.FileUtils;
 import org.schema.schine.graphicsengine.core.Controller;
 import thederpgamer.startunes.StarTunes;
 import thederpgamer.startunes.data.TrackData;
@@ -14,7 +13,6 @@ import javax.sound.sampled.AudioSystem;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 
 /**
@@ -25,6 +23,7 @@ import java.util.HashMap;
  */
 public class ResourceManager {
 
+    /*
     public enum Music {
         MAIN_THEME("Main Theme", "Daniel Tusjak"),
         NEW_HORIZONS("New Horizons", "Daniel Tusjak"),
@@ -52,6 +51,7 @@ public class ResourceManager {
             this.artist = artist;
         }
     }
+     */
 
     public final static HashMap<String, TrackData> musicMap = new HashMap<>();
 
@@ -90,6 +90,7 @@ public class ResourceManager {
             }
         }
 
+        /*
         for(Music music : Music.values()) {
             try {
                 File exportFile = new File(musicFolder.getPath() + "/" + music.name + " - " + music.artist + ".wav");
@@ -110,6 +111,7 @@ public class ResourceManager {
                 exception.printStackTrace();
             }
         }
+         */
     }
 
     public static TrackData createTrackData(File musicFile) {

@@ -1,13 +1,13 @@
 {
   "name": "StarTunes",
   "author": "TheDerpGamer",
-  "description": "In game music mod.",
-  "version": "1.0.0",
+  "description": "In-game music player mod.",
+  "version": "1.0.1",
   "starmade_version": "0.203.111",
   "client_mod": true,
-  "server_mod": true,
+  "server_mod": false,
   "main_class": "thederpgamer.startunes.StarTunes",
-  "smd_resource_id": 9999,
+  "smd_resource_id": 8366,
   "dependencies": [
     -1
   ],
