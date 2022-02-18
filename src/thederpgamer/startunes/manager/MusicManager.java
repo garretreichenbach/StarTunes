@@ -52,11 +52,20 @@ public class MusicManager {
         currentLength = 0;
         try {
             timer.cancel();
-            timer.purge();
+            //timer.purge();
         } catch(Exception exception) {
             exception.printStackTrace();
         }
         stopped = true;
+    }
+
+    public static void purge() {
+        if(currentSource != null) {
+            currentSource.stop();
+            //currentSource.cleanup();
+        }
+        Controller.getAudioManager().stopBackgroundMusic();
+        stopped = false;
     }
 
     public static void setShuffle(boolean shuffle) {
@@ -72,16 +81,17 @@ public class MusicManager {
     }
 
     public static void setCurrentTrack(String track) {
+        //stopMusic();
         if(playList.isEmpty()) initializePlayList();
-        stopMusic();
         currentTrack = track;
-        stopped = false;
+        //stopped = false;
         currentLength = getRunTimeMS(getRunTime(currentTrack));
         try {
             timer = new Timer();
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
+                    purge();
                     if(trackLoop) setCurrentTrack(currentTrack);
                     else nextTrack();
                 }

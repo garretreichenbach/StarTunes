@@ -2,7 +2,7 @@
   "name": "StarTunes",
   "author": "TheDerpGamer",
   "description": "In-game music player mod.",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "starmade_version": "0.203.111",
   "client_mod": true,
   "server_mod": false,
