@@ -28,6 +28,10 @@ public class GUIMinMaxSetting extends AbstractSizeSetting {
             MusicManager.musicVolume = setting;
             ConfigManager.getMainConfig().set("music-volume", MusicManager.musicVolume);
             ConfigManager.getMainConfig().saveConfig();
+            if(MusicManager.currentSource != null) {
+                MusicManager.currentSource.setPriority(true);
+                MusicManager.currentSource.sourceVolume = MusicManager.musicVolume * 0.15f;
+            }
         }
         if (guiCallBack != null) guiCallBack.settingChanged(setting);
     }
@@ -40,6 +44,10 @@ public class GUIMinMaxSetting extends AbstractSizeSetting {
             MusicManager.musicVolume = setting;
             ConfigManager.getMainConfig().set("music-volume", MusicManager.musicVolume);
             ConfigManager.getMainConfig().saveConfig();
+            if(MusicManager.currentSource != null) {
+                MusicManager.currentSource.setPriority(true);
+                MusicManager.currentSource.sourceVolume = MusicManager.musicVolume * 0.15f;
+            }
         }
         if (guiCallBack != null) guiCallBack.settingChanged(setting);
     }

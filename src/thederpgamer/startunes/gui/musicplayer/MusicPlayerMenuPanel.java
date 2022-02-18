@@ -282,7 +282,7 @@ public class MusicPlayerMenuPanel extends GUIMenuPanel {
         contentPane.getContent(0).attach(volumeOverlay);
         contentPane.getContent(2).attach(buttonPane);
         contentPane.setTextBoxHeight(1, (GLFrame.getHeight() / 2) + 67);
-        contentPane.setTextBoxHeight(2, (int) (buttonPane.getHeight() + 15));
+        contentPane.setTextBoxHeight(2, (int) (buttonPane.getHeight() + 35));
         volumeOverlay.orientate(ORIENTATION_HORIZONTAL_MIDDLE);
         volumeSelector.orientate(ORIENTATION_HORIZONTAL_MIDDLE);
         volumeSelector.getPos().x += 50;

@@ -1,6 +1,5 @@
 package thederpgamer.startunes.gui.musicplayer;
 
-import org.schema.schine.graphicsengine.core.Controller;
 import org.schema.schine.graphicsengine.core.MouseEvent;
 import org.schema.schine.graphicsengine.forms.gui.*;
 import org.schema.schine.graphicsengine.forms.gui.newgui.*;
@@ -40,10 +39,7 @@ public class TrackScrollableList extends ScrollableTableList<String> {
                 @Override
                 public void callback(GUIElement guiElement, MouseEvent mouseEvent) {
                     if(mouseEvent.pressedLeftMouse()) {
-                        Controller.getAudioManager().stopBackgroundMusic();
-                        MusicManager.currentTrack = null;
-                        MusicManager.runTime = 0;
-                        MusicManager.currentLength = 0;
+                        MusicManager.stopMusic();
                         LogManager.logInfo("Stopped playing music");
                         panel.recreateTabs();
                     }

@@ -1,5 +1,6 @@
 package thederpgamer.startunes.manager;
 
+import api.utils.textures.StarLoaderTexture;
 import org.schema.schine.graphicsengine.core.Controller;
 import paulscode.sound.Library;
 import paulscode.sound.SoundSystem;
@@ -28,15 +29,34 @@ public class MusicManager {
     public static SourceLWJGLOpenAL currentSource;
     public static final ConcurrentHashMap<Integer, String> playList = new ConcurrentHashMap<>();
     private static int trackIndex = 0;
+
+    public static boolean stopped = true;
     public static boolean trackLoop = false;
     public static boolean trackShuffle = false;
-
     public static String currentTrack;
-    public static float runTime = 0;
-    public static float currentLength = 0;
+    public static long currentLength = 0;
+    private static Timer timer;
 
     public static float getProgress() {
-        return (runTime / currentLength) * 10.0f;
+        if(currentSource == null) return 0;
+        else return currentSource.millisecondsPlayed() / currentLength;
+    }
+
+    public static void stopMusic() {
+        if(currentSource != null) {
+            currentSource.stop();
+            //currentSource.cleanup();
+        }
+        Controller.getAudioManager().stopBackgroundMusic();
+        currentTrack = null;
+        currentLength = 0;
+        try {
+            timer.cancel();
+            timer.purge();
+        } catch(Exception exception) {
+            exception.printStackTrace();
+        }
+        stopped = true;
     }
 
     public static void setShuffle(boolean shuffle) {
@@ -53,35 +73,33 @@ public class MusicManager {
 
     public static void setCurrentTrack(String track) {
         if(playList.isEmpty()) initializePlayList();
-        Controller.getAudioManager().stopBackgroundMusic();
+        stopMusic();
+        currentTrack = track;
+        stopped = false;
+        currentLength = getRunTimeMS(getRunTime(currentTrack));
+        try {
+            timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    if(trackLoop) setCurrentTrack(currentTrack);
+                    else nextTrack();
+                }
+            }, currentLength);
+        } catch(Exception exception) {
+            exception.printStackTrace();
+        }
+
         Controller.getAudioManager().playBackgroundMusic(getTrackName(track), MusicManager.musicVolume);
         StarTunes.getInstance().trackDrawer.setCurrentTrack(getTrackName(track), getArtistName(track));
         updateCurrentTrack();
         LogManager.logInfo("Now playing: " + track);
-        StarTunes.getInstance().musicControlManager.getMenuPanel().recreateTabs();
-
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
+        StarLoaderTexture.runOnGraphicsThread(new Runnable() {
             @Override
             public void run() {
-                if(trackLoop) setCurrentTrack(currentTrack);
-                else nextTrack();
-                currentLength = getRunTimeMS(getRunTime(currentTrack));
-                currentSource.sourceVolume = musicVolume * 0.1f;
-                cancel();
+                StarTunes.getInstance().musicControlManager.getMenuPanel().recreateTabs();
             }
-        }, getRunTimeMS(getRunTime(track)));
-
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                if(runTime < currentLength) runTime ++;
-                else {
-                    runTime = 0;
-                    cancel();
-                }
-            }
-        }, 1, 1);
+        });
     }
 
     public static void nextTrack() {
@@ -99,6 +117,7 @@ public class MusicManager {
     }
 
     public static void initializePlayList() {
+        timer = new Timer();
         int i = 0;
         for(String track : ResourceManager.musicMap.keySet()) {
             playList.put(i, track);
