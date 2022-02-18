@@ -1,0 +1,49 @@
+plugins {
+    id 'java'
+    id'application'
+    id'com.github.johnrengelman.shadow' version '5.2.0'
+}
+
+def starmadeDirectory = 'C:/Program Files (x86)/Steam/steamapps/common/StarMade/StarMade/'
+def jarName = 'StarTunes'
+mainClassName = 'thederpgamer.startunes.StarTunes'
+group 'thederpgamer.startunes'
+version '1.0.4'
+
+repositories {
+    mavenCentral()
+    maven {
+        name 'jaudiotagger'
+        url 'https://mvnrepository.com/artifact/org/jaudiotagger'
+    }
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.6.0"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+    compile(files(starmadeDirectory + "StarMade.jar"))
+    compile(fileTree(dir: (starmadeDirectory + "lib"), include: "*.jar"))
+    compile group: 'org', name: 'jaudiotagger', version: '2.0.3'
+}
+
+compileJava.options.encoding = 'UTF-8'
+
+jar {
+    destinationDirectory.set(file(starmadeDirectory + "mods"))
+    archiveFileName = jarName + '.jar'
+    manifest {
+        attributes('Main-Class': mainClassName)
+    }
+
+    from {
+        configurations.compile.collect {
+            if(!it.getPath().contains("StarMade") && it.getName().endsWith(".jar")) it.isDirectory() ? it : zipTree(it)
+            else return null;
+        }
+    }
+}
+
+test {
+    useJUnitPlatform()
+}

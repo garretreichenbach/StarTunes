@@ -1,6 +1,7 @@
 package thederpgamer.startunes.manager;
 
 import api.mod.config.FileConfiguration;
+import org.lwjgl.input.Keyboard;
 import thederpgamer.startunes.StarTunes;
 
 /**
@@ -22,8 +23,15 @@ public class ConfigManager {
     //Key Config
     private static FileConfiguration keyConfig;
     public static final String[] defaultKeyConfig = {
-            "open-music-player: INSERT"
+            "open-music-player: ADD",
+            "pause-music: PAUSE",
+            "previous-track: PRIOR",
+            "next-track: NEXT"
     };
+    public static int OPEN_PLAYER;
+    public static int PAUSE_MUSIC;
+    public static int PREVIOUS_TRACK;
+    public static int NEXT_TRACK;
 
     public static void initialize(StarTunes instance) {
         mainConfig = instance.getConfig("config");
@@ -31,6 +39,11 @@ public class ConfigManager {
 
         keyConfig = instance.getConfig("key-bindings");
         keyConfig.saveDefault(defaultKeyConfig);
+
+        OPEN_PLAYER = Keyboard.getKeyIndex(keyConfig.getString("open-music-player"));
+        PAUSE_MUSIC = Keyboard.getKeyIndex(keyConfig.getString("pause-music"));
+        PREVIOUS_TRACK = Keyboard.getKeyIndex(keyConfig.getString("previous-track"));
+        NEXT_TRACK = Keyboard.getKeyIndex(keyConfig.getString("next-track"));
     }
 
     public static FileConfiguration getMainConfig() {

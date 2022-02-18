@@ -8,7 +8,6 @@ import api.listener.events.input.KeyPressEvent;
 import api.mod.StarLoader;
 import api.mod.StarMod;
 import api.utils.gui.ModGUIHandler;
-import org.lwjgl.input.Keyboard;
 import org.schema.game.client.view.gui.newgui.GUITopBar;
 import org.schema.schine.graphicsengine.core.MouseEvent;
 import org.schema.schine.graphicsengine.forms.gui.GUIActivationHighlightCallback;
@@ -36,8 +35,7 @@ public class StarTunes extends StarMod {
     public static StarTunes getInstance() {
         return instance;
     }
-    public static void main(String[] args) {
-    }
+    public static void main(String[] args) {}
     public StarTunes() {
         instance = this;
     }
@@ -59,23 +57,29 @@ public class StarTunes extends StarMod {
 
     @Override
     public void onResourceLoad(ResourceLoader resourceLoader) {
-        ResourceManager.loadResources(this);
+        ResourceManager.loadResources();
     }
 
     private void registerListeners() {
         StarLoader.registerListener(KeyPressEvent.class, new Listener<KeyPressEvent>() {
             @Override
             public void onEvent(KeyPressEvent event) {
-                if(event.isKeyDown() && event.getKey() == Keyboard.getKeyIndex(ConfigManager.getKeyConfig().getString("open-music-player").toUpperCase().trim())) {
-                    if(musicControlManager == null) {
-                        musicControlManager = new MusicPlayerControlManager();
-                        ModGUIHandler.registerNewControlManager(getSkeleton(), musicControlManager);
-                        MusicManager.musicVolume = ConfigManager.getMainConfig().getConfigurableInt("music-volume", 5);
-                    }
+                if(event.isKeyDown()) {
+                    if(GameClient.getClientState() != null && GameClient.getClientPlayerState() != null) {
+                        if(musicControlManager == null) {
+                            musicControlManager = new MusicPlayerControlManager();
+                            ModGUIHandler.registerNewControlManager(getSkeleton(), musicControlManager);
+                            MusicManager.musicVolume = ConfigManager.getMainConfig().getConfigurableInt("music-volume", 5);
+                        }
 
-                    GameClient.getClientState().getController().queueUIAudio("0022_menu_ui - enter");
-                    GameClient.getClientState().getGlobalGameControlManager().getIngameControlManager().getPlayerGameControlManager().deactivateAll();
-                    musicControlManager.setActive(true);
+                        if(event.getKey() == ConfigManager.OPEN_PLAYER) {
+                            GameClient.getClientState().getController().queueUIAudio("0022_menu_ui - enter");
+                            GameClient.getClientState().getGlobalGameControlManager().getIngameControlManager().getPlayerGameControlManager().deactivateAll();
+                            musicControlManager.setActive(true);
+                        } else if(event.getKey() == ConfigManager.PAUSE_MUSIC) MusicManager.setPaused(!MusicManager.isPaused());
+                        else if(event.getKey() == ConfigManager.NEXT_TRACK) MusicManager.nextTrack();
+                        else if(event.getKey() == ConfigManager.PREVIOUS_TRACK) MusicManager.prevTrack();
+                    }
                 }
             }
         }, this);

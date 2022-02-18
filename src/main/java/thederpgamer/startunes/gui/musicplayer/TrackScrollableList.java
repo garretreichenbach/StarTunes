@@ -6,6 +6,7 @@ import org.schema.schine.graphicsengine.forms.gui.newgui.*;
 import org.schema.schine.input.InputState;
 import thederpgamer.startunes.manager.LogManager;
 import thederpgamer.startunes.manager.MusicManager;
+import thederpgamer.startunes.manager.ResourceManager;
 import thederpgamer.startunes.utils.DateUtils;
 
 import java.util.Collection;
@@ -47,7 +48,7 @@ public class TrackScrollableList extends ScrollableTableList<String> {
 
                 @Override
                 public boolean isOccluded() {
-                    return false;
+                    return panel.checkOccluded();
                 }
             }, new GUIActivationCallback() {
                 @Override
@@ -72,7 +73,7 @@ public class TrackScrollableList extends ScrollableTableList<String> {
 
                 @Override
                 public boolean isOccluded() {
-                    return false;
+                    return panel.checkOccluded();
                 }
             }, new GUIActivationCallback() {
                 @Override
@@ -87,19 +88,24 @@ public class TrackScrollableList extends ScrollableTableList<String> {
             });
         }
 
-        buttonPane.addButton(1, 0, "AUTOPLAY SETTINGS", GUIHorizontalArea.HButtonColor.PINK, new GUICallback() {
+        buttonPane.addButton(1, 0, "AUTOPLAY", GUIHorizontalArea.HButtonColor.PINK, new GUICallback() {
             @Override
             public void callback(GUIElement guiElement, MouseEvent mouseEvent) {
                 if(mouseEvent.pressedLeftMouse()) { //Todo
-
+                    MusicManager.toggleAutoPlay(entry);
                 }
             }
 
             @Override
             public boolean isOccluded() {
-                return false;
+                return panel.checkOccluded();
             }
-        }, new GUIActivationCallback() {
+        }, new GUIActivationHighlightCallback() {
+            @Override
+            public boolean isHighlighted(InputState inputState) {
+                return ResourceManager.musicMap.get(entry).autoPlay;
+            }
+
             @Override
             public boolean isVisible(InputState inputState) {
                 return true;
@@ -196,11 +202,11 @@ public class TrackScrollableList extends ScrollableTableList<String> {
     }
 
     private String getTrackName(String entry) {
-        return entry.split(" - ")[0].trim();
+        return ResourceManager.musicMap.get(entry).name;
     }
 
     private String getArtistName(String entry) {
-        return entry.split(" - ")[1].trim();
+        return ResourceManager.musicMap.get(entry).artist;
     }
 
     private int getRunTime(String entry) {
@@ -222,6 +228,16 @@ public class TrackScrollableList extends ScrollableTableList<String> {
             this.highlightSelect = true;
             this.highlightSelectSimple = true;
             this.setAllwaysOneSelected(true);
+        }
+
+        @Override
+        public void clickedOnRow() {
+            if(!panel.checkOccluded()) super.clickedOnRow();
+        }
+
+        @Override
+        public boolean isOccluded() {
+            return panel.checkOccluded();
         }
     }
 }
