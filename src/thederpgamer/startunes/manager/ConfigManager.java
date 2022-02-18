@@ -22,7 +22,7 @@ public class ConfigManager {
     //Key Config
     private static FileConfiguration keyConfig;
     public static final String[] defaultKeyConfig = {
-
+            "open-music-player: INSERT"
     };
 
     public static void initialize(StarTunes instance) {

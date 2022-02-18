@@ -14,7 +14,6 @@ import org.schema.schine.input.InputState;
 import thederpgamer.startunes.data.TrackSortData;
 import thederpgamer.startunes.manager.ConfigManager;
 import thederpgamer.startunes.manager.MusicManager;
-import thederpgamer.startunes.utils.DateUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,32 +27,11 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class MusicPlayerMenuPanel extends GUIMenuPanel {
 
-    public String currentTrack;
-    public long trackLength;
-    public long runTimer;
-    private boolean loop = false;
-    private boolean shuffle = false;
-
     private GUIHorizontalProgressBar progressBar;
     private TrackScrollableList trackList;
 
     public MusicPlayerMenuPanel(InputState inputState) {
         super(inputState, "MusicPlayerMenu", GLFrame.getWidth() / 2, GLFrame.getHeight() / 2);
-    }
-
-    @Override
-    public void draw() {
-        super.draw();
-        if(runTimer <= 0 && currentTrack != null) {
-            if(!MusicManager.trackLoop) MusicManager.nextTrack();
-            else MusicManager.setCurrentTrack(currentTrack);
-            runTimer = 0;
-            trackLength = 0;
-            currentTrack = null;
-        } else if(MusicManager.currentSource != null && !MusicManager.currentSource.paused()) {
-            MusicManager.currentSource.sourceVolume = MusicManager.musicVolume * 0.1f;
-            runTimer = Math.max(0, runTimer - 1);
-        }
     }
 
     @Override
@@ -70,9 +48,9 @@ public class MusicPlayerMenuPanel extends GUIMenuPanel {
         currentTrackOverlay.orientate(ORIENTATION_LEFT);
         currentTrackOverlay.getPos().x += 5;
         //Todo: Clear when track is finished playing
-        if(currentTrack == null) currentTrackOverlay.setTextSimple("No current music");
+        if(MusicManager.currentTrack == null) currentTrackOverlay.setTextSimple("No current music");
         else {
-            String[] fields = currentTrack.split(" - ");
+            String[] fields = MusicManager.currentTrack.split(" - ");
             currentTrackOverlay.setTextSimple("Now Playing: " + fields[0] + " - " + fields[1]);
         }
         contentPane.getContent(0).attach(currentTrackOverlay);
@@ -81,12 +59,7 @@ public class MusicPlayerMenuPanel extends GUIMenuPanel {
         progressBar = new GUIHorizontalProgressBar(getState(), progressBarAnchor) {
             @Override
             public float getValue() {
-                return getProgress();
-            }
-
-            @Override
-            public String getText() {
-                return DateUtils.getRunTime((int) getCurrentTime());
+                return MusicManager.getProgress();
             }
         };
         /*
@@ -131,7 +104,7 @@ public class MusicPlayerMenuPanel extends GUIMenuPanel {
 
                 @Override
                 public boolean isOccluded() {
-                    return currentTrack == null;
+                    return MusicManager.currentTrack == null;
                 }
             }, new GUIActivationCallback() {
                 @Override
@@ -141,7 +114,7 @@ public class MusicPlayerMenuPanel extends GUIMenuPanel {
 
                 @Override
                 public boolean isActive(InputState inputState) {
-                    return currentTrack != null;
+                    return MusicManager.currentTrack != null;
                 }
             });
         } else {
@@ -156,7 +129,7 @@ public class MusicPlayerMenuPanel extends GUIMenuPanel {
 
                 @Override
                 public boolean isOccluded() {
-                    return currentTrack == null;
+                    return MusicManager.currentTrack == null;
                 }
             }, new GUIActivationCallback() {
                 @Override
@@ -166,7 +139,7 @@ public class MusicPlayerMenuPanel extends GUIMenuPanel {
 
                 @Override
                 public boolean isActive(InputState inputState) {
-                    return currentTrack != null;
+                    return MusicManager.currentTrack != null;
                 }
             });
         }
@@ -174,19 +147,18 @@ public class MusicPlayerMenuPanel extends GUIMenuPanel {
             @Override
             public void callback(GUIElement guiElement, MouseEvent mouseEvent) {
                 if(mouseEvent.pressedLeftMouse()) {
-                    loop = !loop;
-                    MusicManager.setLoop(loop);
+                    MusicManager.setLoop(!MusicManager.trackLoop);
                 }
             }
 
             @Override
             public boolean isOccluded() {
-                return currentTrack == null;
+                return MusicManager.currentTrack == null;
             }
         }, new GUIActivationHighlightCallback() {
             @Override
             public boolean isHighlighted(InputState inputState) {
-                return currentTrack != null && loop;
+                return MusicManager.currentTrack != null && MusicManager.trackLoop;
             }
 
             @Override
@@ -196,7 +168,7 @@ public class MusicPlayerMenuPanel extends GUIMenuPanel {
 
             @Override
             public boolean isActive(InputState inputState) {
-                return currentTrack != null;
+                return MusicManager.currentTrack != null;
             }
         });
         buttonPane.addButton(2, 0, "AUTOPLAY SETTINGS", GUIHorizontalArea.HButtonColor.PINK, new GUICallback() {
@@ -232,7 +204,7 @@ public class MusicPlayerMenuPanel extends GUIMenuPanel {
 
             @Override
             public boolean isOccluded() {
-                return currentTrack == null;
+                return MusicManager.currentTrack == null;
             }
         }, new GUIActivationCallback() {
             @Override
@@ -242,7 +214,7 @@ public class MusicPlayerMenuPanel extends GUIMenuPanel {
 
             @Override
             public boolean isActive(InputState inputState) {
-                return currentTrack != null;
+                return MusicManager.currentTrack != null;
             }
         });
         buttonPane.addButton(1, 1, "NEXT TRACK", GUIHorizontalArea.HButtonColor.BLUE, new GUICallback() {
@@ -255,7 +227,7 @@ public class MusicPlayerMenuPanel extends GUIMenuPanel {
 
             @Override
             public boolean isOccluded() {
-                return currentTrack == null;
+                return MusicManager.currentTrack == null;
             }
         }, new GUIActivationCallback() {
             @Override
@@ -265,26 +237,25 @@ public class MusicPlayerMenuPanel extends GUIMenuPanel {
 
             @Override
             public boolean isActive(InputState inputState) {
-                return currentTrack != null;
+                return MusicManager.currentTrack != null;
             }
         });
         buttonPane.addButton(2, 1, "SHUFFLE", GUIHorizontalArea.HButtonColor.YELLOW, new GUICallback() {
             @Override
             public void callback(GUIElement guiElement, MouseEvent mouseEvent) {
                 if(mouseEvent.pressedLeftMouse()) {
-                    shuffle = !shuffle;
-                    MusicManager.setShuffle(shuffle);
+                    MusicManager.setShuffle(!MusicManager.trackShuffle);
                 }
             }
 
             @Override
             public boolean isOccluded() {
-                return currentTrack == null;
+                return MusicManager.currentTrack == null;
             }
         }, new GUIActivationHighlightCallback() {
             @Override
             public boolean isHighlighted(InputState inputState) {
-                return currentTrack != null && shuffle;
+                return MusicManager.currentTrack != null && MusicManager.trackShuffle;
             }
 
             @Override
@@ -294,7 +265,7 @@ public class MusicPlayerMenuPanel extends GUIMenuPanel {
 
             @Override
             public boolean isActive(InputState inputState) {
-                return currentTrack != null;
+                return MusicManager.currentTrack != null;
             }
         });
 
@@ -318,24 +289,6 @@ public class MusicPlayerMenuPanel extends GUIMenuPanel {
         volumeOverlay.getPos().x -= 50;
         volumeOverlay.getPos().y += 5;
         guiWindow.setSelectedTab(lastTab);
-    }
-
-    private float getProgress() {
-        float lengthSeconds = trackLength / 1000.0f;
-        if(currentTrack == null) return 0;
-        else return (getCurrentTime() / lengthSeconds) * 10;
-    }
-
-    public float getCurrentTime() {
-        float lengthSeconds = trackLength / 1000.0f;
-        float runTimerSeconds = runTimer / 1000.0f;
-        return lengthSeconds - runTimerSeconds;
-    }
-
-    private void setCurrentTime(float percent) {
-        float lengthSeconds = trackLength / 1000.0f;
-        runTimer = (long) (((percent / 10) * lengthSeconds));
-        MusicManager.setMusicTime(runTimer);
     }
 
     public void sortPlayList(ConcurrentHashMap<Integer, String> playList) {

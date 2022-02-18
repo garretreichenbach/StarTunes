@@ -35,15 +35,15 @@ public class TrackScrollableList extends ScrollableTableList<String> {
         GUIHorizontalButtonTablePane buttonPane = new GUIHorizontalButtonTablePane(getState(), 2, 1, anchor);
         buttonPane.onInit();
 
-        if(panel.currentTrack != null && panel.currentTrack.equals(entry)) {
+        if(MusicManager.currentTrack != null && MusicManager.currentTrack.equals(entry)) {
             buttonPane.addButton(0, 0, "STOP", GUIHorizontalArea.HButtonColor.RED, new GUICallback() {
                 @Override
                 public void callback(GUIElement guiElement, MouseEvent mouseEvent) {
                     if(mouseEvent.pressedLeftMouse()) {
                         Controller.getAudioManager().stopBackgroundMusic();
-                        panel.currentTrack = null;
-                        panel.runTimer = 0;
-                        panel.trackLength = 0;
+                        MusicManager.currentTrack = null;
+                        MusicManager.runTime = 0;
+                        MusicManager.currentLength = 0;
                         LogManager.logInfo("Stopped playing music");
                         panel.recreateTabs();
                     }
@@ -172,7 +172,7 @@ public class TrackScrollableList extends ScrollableTableList<String> {
 
         for(String entry : set) {
             GUITextOverlayTable nameTextElement;
-            if(panel.currentTrack != null && panel.currentTrack.equals(entry)) (nameTextElement = new GUITextOverlayTable(10, 10, this.getState())).setTextSimple(getTrackName(entry) + " (Playing)");
+            if(MusicManager.currentTrack != null && MusicManager.currentTrack.equals(entry)) (nameTextElement = new GUITextOverlayTable(10, 10, this.getState())).setTextSimple(getTrackName(entry) + " (Playing)");
             else (nameTextElement = new GUITextOverlayTable(10, 10, this.getState())).setTextSimple(getTrackName(entry));
             GUIClippedRow nameRowElement;
             (nameRowElement = new GUIClippedRow(this.getState())).attach(nameTextElement);
