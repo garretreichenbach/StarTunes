@@ -1,6 +1,5 @@
 package thederpgamer.startunes.gui.musicplayer;
 
-import api.common.GameClient;
 import api.utils.gui.GUIMenuPanel;
 import org.schema.game.client.view.gui.buildtools.GUIBuildToolSettingSelector;
 import org.schema.schine.graphicsengine.core.GLFrame;
@@ -66,14 +65,15 @@ public class MusicPlayerMenuPanel extends GUIMenuPanel {
 
             @Override
             public boolean isOccluded() {
-                return currentTrack == null;
+                return MusicManager.currentTrack == null;
             }
 
             @Override
             public void callback(GUIElement callingGuiElement, MouseEvent event) {
                 if(event.pressedLeftMouse()){
-                    float percent = progressBar.getRelMousePos().x / progressBar.getWidth();
-                    setCurrentTime(percent);
+                    float percent = (progressBar.getRelMousePos().x / progressBar.getWidth());
+                    long time = (long) ((MusicManager.currentSource.millisecondsPlayed()) * percent);
+                    MusicManager.setMusicTime(time);
                 }
             }
         });

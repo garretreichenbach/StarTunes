@@ -231,7 +231,31 @@ public class MusicManager {
 
     public static void setMusicTime(long time) {
         if(currentSource != null) {
-            //currentSource.
+            try {
+                //currentSource.pause();
+                byte[] rawData = currentSource.soundBuffer.audioData;
+                float totalFrames = getRunTime(currentTrack) * (currentSource.soundBuffer.audioFormat.getSampleSizeInBits() * currentSource.soundBuffer.audioFormat.getFrameSize());
+                float targetFrame = (float) (time * (currentSource.soundBuffer.audioFormat.getSampleSizeInBits() * currentSource.soundBuffer.audioFormat.getFrameSize()));
+                int targetByte = (int) (targetFrame * currentSource.soundBuffer.audioFormat.getSampleSizeInBits());
+                int framesLeft = (int) (totalFrames - targetFrame);
+                byte[] newData = new byte[framesLeft];
+                System.arraycopy(rawData, targetByte, newData, 0, framesLeft);
+                currentSource.soundBuffer.audioData = newData;
+                currentLength = (long) framesLeft;
+                timer.cancel();
+                timer = new Timer();
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        purge();
+                        if(trackLoop) setCurrentTrack(currentTrack);
+                        else nextTrack();
+                    }
+                }, currentLength);
+                //currentSource.play(currentSource.channel);
+            } catch(Exception exception) {
+                exception.printStackTrace();
+            }
         }
     }
 
