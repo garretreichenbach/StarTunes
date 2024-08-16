@@ -40,10 +40,10 @@ public class GUIMusicPanel extends GUIMenuPanel {
 			@Override
 			public void draw() {
 				super.draw();
-				long runTime = musicManager.getRunTime();
-				int seconds = (int) (runTime / 1000);
-				String currentTime = String.format("%02d:%02d", seconds / 60, seconds % 60);
-				String duration = String.format("%02d:%02d", musicManager.getCurrentTrack().getDuration() / 60, musicManager.getCurrentTrack().getDuration() % 60);
+				int currentSeconds = (int) (musicManager.getRunTime() / 1000);
+				int totalSeconds = (int) (musicManager.getCurrentTrack().getDuration() / 1000);
+				String currentTime = String.format("%02d:%02d", currentSeconds / 60, currentSeconds % 60);
+				String duration = String.format("%02d:%02d", totalSeconds / 60, totalSeconds % 60);
 				String text = "Stopped    00:00 / 00:00";
 				if(musicManager.isPaused()) text = "Paused    " + currentTime + " / " + duration;
 				else if(!musicManager.isStopped()) text = "Playing    " + currentTime + " / " + duration;

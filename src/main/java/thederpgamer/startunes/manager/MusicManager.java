@@ -27,6 +27,7 @@ public class MusicManager {
 	private Thread musicThread;
 	private long runTime;
 	private boolean paused;
+	private long start;
 
 	public static MusicManager getManager() {
 		return manager;
@@ -83,12 +84,13 @@ public class MusicManager {
 		lastPlayed = music.indexOf(trackData);
 
 		if(musicThread != null) musicThread.interrupt();
+		start = System.currentTimeMillis();
 		musicThread = new Thread("MusicThread") {
 			@Override
 			public void run() {
-				runTime = System.currentTimeMillis();
+				runTime = System.currentTimeMillis() - start;
 				while(isPlaying(trackData)) {
-					if(System.currentTimeMillis() - runTime >= trackData.getDuration() * 1000L) {
+					if(System.currentTimeMillis() - runTime >= trackData.getDuration()) {
 						if(isLooping()) play(trackData);
 						else if(autoPlay) next();
 						else break;
@@ -130,7 +132,7 @@ public class MusicManager {
 		if(music.isEmpty()) return;
 		SoundSystem soundSystem = getSoundSystem();
 		if(soundSystem != null) {
-			if(paused) soundSystem.play("music");
+			if(paused) play();
 			else soundSystem.pause("music");
 		}
 		this.paused = paused;
