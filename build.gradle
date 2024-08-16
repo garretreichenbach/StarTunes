@@ -1,36 +1,44 @@
 plugins {
     id 'java'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
 }
 
-version '1.0.0'
+apply plugin: 'java'
 
-def modName = 'ModTemplate'
-def starmadeDirectory = 'C:/Program Files (x86)/Steam/steamapps/common/StarMade/StarMade/' //Change this to your StarMade directory
+targetCompatibility = 1.7
+sourceCompatibility = 1.7
+
+def starmadeDirectory = 'C:/Program Files (x86)/Steam/steamapps/common/StarMade/StarMade/'
+def jarName = 'StarTunes'
+mainClassName = 'thederpgamer.startunes.StarTunes'
+group 'thederpgamer.startunes'
+version '2.0.0'
 
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
-    compile(files(starmadeDirectory + "StarMade.jar"))
-    compile(fileTree(dir: (starmadeDirectory + "lib"), include: "*.jar"))
+    implementation(files(starmadeDirectory + "StarMade.jar"))
+    implementation(fileTree(dir: (starmadeDirectory + "lib"), include: "*.jar"))
+    implementation(fileTree(dir: ("lib"), include: "*.jar"))
+    implementation group: 'org', name: 'jaudiotagger', version: '2.0.3'
 }
 
-jar {
-    destinationDirectory.set(file(starmadeDirectory + "mods"))
-    archiveFileName = modName  + 'v' + version + '.jar'
-    manifest {
-        attributes('Main-Class': modName)
-    }
+compileJava.options.encoding = 'UTF-8'
 
+jar {
+    dependsOn configurations.runtimeClasspath
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+    destinationDirectory.set(file(starmadeDirectory + "mods"))
+    archiveFileName = jarName + 'v' + version + '.jar'
+    manifest.attributes('Main-Class': mainClassName)
     from {
-        configurations.compile.collect {
-            if(!it.getPath().contains("StarMade") && it.getName().endsWith(".jar")) it.isDirectory() ? it : zipTree(it)
+        configurations.runtimeClasspath.collect {
+            if (!it.getPath().contains("StarMade") && it.getName().endsWith(".jar")) it.isDirectory() ? it : zipTree(it)
             else return null;
         }
     }
-}
-
-test {
-    useJUnitPlatform()
 }
