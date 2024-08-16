@@ -44,6 +44,9 @@ public class TrackData implements JSONSerializable, Comparable<TrackData> {
 					String name = getField(audioFile, FieldKey.TITLE);
 					String artist = getField(audioFile, FieldKey.ARTIST);
 					int runTime = audioFile.getAudioHeader().getTrackLength();
+					int minutes = runTime / 60;
+					int seconds = runTime % 60;
+					runTime = (minutes * 60 + seconds) * 1000;
 					Controller.audioManager.addMusic(name, file);
 					return loadTrackInfo(name, artist, runTime);
 				}

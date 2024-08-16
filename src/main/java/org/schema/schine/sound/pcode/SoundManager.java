@@ -33,7 +33,7 @@ public class SoundManager {
 	/**
 	 * A reference to the sound system.
 	 */
-	private static SoundSystem sndSystem;
+	public static SoundSystem sndSystem;
 	/**
 	 * Set to true when the SoundManager has been initialised.
 	 */
@@ -61,7 +61,7 @@ public class SoundManager {
 
 	private boolean soundVolumeChanged;
 
-	private float bgMusicVolume = 0.35f;
+	private float bgMusicVolume = 0.18f;
 	private Object2ObjectOpenHashMap<String, PlayedCheck> playedMap = new Object2ObjectOpenHashMap<String, PlayedCheck>();
 
 	public SoundManager() {
@@ -177,7 +177,7 @@ public class SoundManager {
 
 	public void playBackgroundMusic(String soundName, float volume) {
 
-		SoundPoolEntry soundpoolentry = soundPoolSounds.get(soundName);
+		SoundPoolEntry soundpoolentry = soundPoolMusic.get(soundName);
 
 		if(soundpoolentry != null && volume > 0.0F) {
 			sndSystem.backgroundMusic("music", soundpoolentry.soundUrl,

@@ -9,7 +9,6 @@ import thederpgamer.startunes.data.TrackData;
 import thederpgamer.startunes.utils.DataUtils;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.util.Objects;
 
 /**
@@ -48,14 +47,7 @@ public class MusicManager {
 	}
 
 	public static SoundSystem getSoundSystem() {
-		try {
-			Field field = SoundManager.class.getDeclaredField("sndSystem");
-			field.setAccessible(true);
-			return (SoundSystem) field.get(Controller.audioManager);
-		} catch(Exception exception) {
-			StarTunes.getInstance().logException(exception.getMessage(), exception);
-			return null;
-		}
+		return SoundManager.sndSystem;
 	}
 
 	public void previous() {
@@ -109,6 +101,7 @@ public class MusicManager {
 				}
 			}
 		};
+		musicThread.start();
 	}
 
 	public void play(int index) {
@@ -129,7 +122,7 @@ public class MusicManager {
 	public boolean isPaused() {
 		if(music.isEmpty()) return false;
 		SoundSystem soundSystem = getSoundSystem();
-		if(soundSystem != null) return soundSystem.playing("bm") && paused;
+		if(soundSystem != null) return soundSystem.playing("music") && paused;
 		return paused;
 	}
 
@@ -137,8 +130,8 @@ public class MusicManager {
 		if(music.isEmpty()) return;
 		SoundSystem soundSystem = getSoundSystem();
 		if(soundSystem != null) {
-			if(paused) soundSystem.play("bm");
-			else soundSystem.pause("bm");
+			if(paused) soundSystem.play("music");
+			else soundSystem.pause("music");
 		}
 		this.paused = paused;
 	}
@@ -170,7 +163,7 @@ public class MusicManager {
 	public boolean isPlaying() {
 		if(music.isEmpty()) return false;
 		SoundSystem soundSystem = getSoundSystem();
-		if(soundSystem != null) return soundSystem.playing("bm");
+		if(soundSystem != null) return soundSystem.playing("music");
 		return false;
 	}
 

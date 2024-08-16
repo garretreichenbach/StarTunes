@@ -3,10 +3,7 @@ package thederpgamer.startunes.gui;
 import api.utils.gui.GUIMenuPanel;
 import org.schema.schine.common.language.Lng;
 import org.schema.schine.graphicsengine.core.MouseEvent;
-import org.schema.schine.graphicsengine.forms.gui.GUIActivationCallback;
-import org.schema.schine.graphicsengine.forms.gui.GUIActivationHighlightCallback;
-import org.schema.schine.graphicsengine.forms.gui.GUICallback;
-import org.schema.schine.graphicsengine.forms.gui.GUIElement;
+import org.schema.schine.graphicsengine.forms.gui.*;
 import org.schema.schine.graphicsengine.forms.gui.newgui.GUIContentPane;
 import org.schema.schine.graphicsengine.forms.gui.newgui.GUIHorizontalArea;
 import org.schema.schine.graphicsengine.forms.gui.newgui.GUIHorizontalButtonTablePane;
@@ -38,7 +35,8 @@ public class GUIMusicPanel extends GUIMenuPanel {
 	private void createMusicTab() {
 		GUIContentPane musicTab = guiWindow.addTab(Lng.str("MUSIC"));
 		musicTab.setTextBoxHeightLast(350);
-		GUIHorizontalProgressBar progressBar = new GUIHorizontalProgressBar(getState(), "Stopped    00:00 / 00:00", musicTab.getContent(0)) {
+		GUIAncor anchor = new GUIAncor(getState(), musicTab.getContent(0).getWidth(), musicTab.getContent(0).getHeight());
+		GUIHorizontalProgressBar progressBar = new GUIHorizontalProgressBar(getState(), "Stopped    00:00 / 00:00", anchor) {
 			@Override
 			public void draw() {
 				super.draw();
@@ -58,8 +56,8 @@ public class GUIMusicPanel extends GUIMenuPanel {
 				else return (float) musicManager.getRunTime() / musicManager.getCurrentTrack().getDuration();
 			}
 		};
-		progressBar.onInit();
-		musicTab.getContent(0).attach(progressBar);
+		anchor.attach(progressBar);
+		musicTab.getContent(0).attach(anchor);
 
 		musicTab.setTextBoxHeightLast(30);
 		musicTab.addNewTextBox(64);
