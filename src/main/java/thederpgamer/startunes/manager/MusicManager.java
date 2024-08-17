@@ -56,8 +56,8 @@ public class MusicManager {
 	}
 
 	public void next() {
-		if(music.isEmpty()) return;
 		stop();
+		if(music.isEmpty()) return;
 		if(looping) play();
 		else {
 			if(shuffle) {
@@ -91,6 +91,12 @@ public class MusicManager {
 					} catch(InterruptedException exception) {
 						StarTunes.getInstance().logException(exception.getMessage(), exception);
 					}
+				}
+				try {
+					sleep(1000);
+					next();
+				} catch(InterruptedException exception) {
+					StarTunes.getInstance().logException(exception.getMessage(), exception);
 				}
 			}
 		}).start();
