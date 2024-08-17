@@ -175,6 +175,14 @@ public class SoundManager {
 		}
 	}
 
+	public long getMsPlayed(String name) {
+		try {
+			return (long) sndSystem.millisecondsPlayed(name);
+		} catch(NullPointerException ignored) {
+			return 0;
+		}
+	}
+
 	public void playBackgroundMusic(String soundName, float volume) {
 
 		SoundPoolEntry soundpoolentry = soundPoolMusic.get(soundName);
@@ -445,6 +453,7 @@ public class SoundManager {
 			return;
 		}
 		sndSystem.stop("music");
+
 	}
 
 	public void stopEntitySound(AudioEntity en) {
@@ -598,9 +607,17 @@ public class SoundManager {
 		sndSystem.play(sourcename);
 	}
 
+	public void rewind(String sourcename) {
+		sndSystem.rewind(sourcename);
+	}
+
 	public void closeStream(String sourcename) {
 		sndSystem.stop(sourcename);
 		sndSystem.removeSource(sourcename);
+	}
+
+	public void setLooping(String src, boolean looping) {
+		sndSystem.setLooping(src, looping);
 	}
 
 	private class SndLog extends SoundSystemLogger {

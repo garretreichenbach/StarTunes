@@ -21,10 +21,10 @@ import java.util.Set;
 public class MusicScrollableList extends ScrollableTableList<TrackData> {
 
 	private final MusicManager musicManager;
-	private final GUIMusicPanel panel;
+	private final GUIAncor panel;
 
-	public MusicScrollableList(InputState state, MusicManager musicManager, GUIMusicPanel panel, GUIAncor anchor) {
-		super(state, 30.0f, 30.0f, anchor);
+	public MusicScrollableList(InputState state, MusicManager musicManager, GUIAncor panel) {
+		super(state, 30.0f, 30.0f, panel);
 		this.musicManager = musicManager;
 		this.panel = panel;
 	}
@@ -71,7 +71,13 @@ public class MusicScrollableList extends ScrollableTableList<TrackData> {
 			GUIClippedRow artistRow = createRow(asset.getArtist());
 			GUIClippedRow lengthRow = createRow(getLengthDisplay(asset));
 			MusicScrollableListRow row = new MusicScrollableListRow(getState(), asset, nameRow, artistRow, lengthRow);
-			GUIAncor anchor = new GUIAncor(getState(), panel.getWidth() - 28.0f, 28.0F);
+			GUIAncor anchor = new GUIAncor(getState(), panel.getWidth() - 28.0f, 28.0F) {
+				@Override
+				public void draw() {
+					super.draw();
+					setWidth(panel.getWidth() - 28.0f);
+				}
+			};
 			anchor.attach(createButtonPane(anchor, asset));
 			row.expanded = new GUIElementList(getState());
 			row.expanded.add(new GUIListElement(anchor, getState()));
@@ -112,7 +118,7 @@ public class MusicScrollableList extends ScrollableTableList<TrackData> {
 	}
 
 	private String getLengthDisplay(TrackData asset) {
-		float rawLength = asset.getDuration();
+		float rawLength = asset.getDuration() / 1000.0f;
 		int minutes = (int) (rawLength / 60);
 		int seconds = (int) (rawLength % 60);
 		return minutes + ":" + (seconds < 10 ? "0" + seconds : seconds);

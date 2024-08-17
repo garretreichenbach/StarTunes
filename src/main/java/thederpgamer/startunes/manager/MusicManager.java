@@ -21,13 +21,9 @@ public class MusicManager {
 	private static final ObjectArrayList<TrackData> music = new ObjectArrayList<>();
 	private static MusicManager manager;
 	private int lastPlayed;
-	private boolean autoPlay = true;
 	private boolean shuffle;
 	private boolean looping;
-	private Thread musicThread;
-	private long runTime;
 	private boolean paused;
-	private long start;
 
 	public static MusicManager getManager() {
 		return manager;
@@ -80,30 +76,21 @@ public class MusicManager {
 		if(music.isEmpty()) return;
 		paused = false;
 		stop();
-		Controller.audioManager.playBackgroundMusic(trackData.getName(), getVolume());
 		lastPlayed = music.indexOf(trackData);
-
-		if(musicThread != null) musicThread.interrupt();
-		start = System.currentTimeMillis();
-		musicThread = new Thread("MusicThread") {
+		Controller.audioManager.playBackgroundMusic(trackData.getName(), 0.18f);
+		(new Thread() {
 			@Override
 			public void run() {
-				runTime = System.currentTimeMillis() - start;
 				while(isPlaying(trackData)) {
-					if(System.currentTimeMillis() - runTime >= trackData.getDuration()) {
-						if(isLooping()) play(trackData);
-						else if(autoPlay) next();
-						else break;
-					}
 					try {
-						sleep(1000);
+						sleep(100);
 					} catch(InterruptedException exception) {
 						StarTunes.getInstance().logException(exception.getMessage(), exception);
 					}
 				}
+				next();
 			}
-		};
-		musicThread.start();
+		}).start();
 	}
 
 	public void play(int index) {
@@ -113,6 +100,7 @@ public class MusicManager {
 
 	public void stop() {
 		if(music.isEmpty()) return;
+		Controller.audioManager.rewind("music");
 		Controller.audioManager.stopBackgroundMusic();
 	}
 
@@ -123,8 +111,6 @@ public class MusicManager {
 
 	public boolean isPaused() {
 		if(music.isEmpty()) return false;
-		SoundSystem soundSystem = getSoundSystem();
-		if(soundSystem != null) return soundSystem.playing("music") && paused;
 		return paused;
 	}
 
@@ -132,7 +118,7 @@ public class MusicManager {
 		if(music.isEmpty()) return;
 		SoundSystem soundSystem = getSoundSystem();
 		if(soundSystem != null) {
-			if(paused) play();
+			if(this.paused) soundSystem.play("music");
 			else soundSystem.pause("music");
 		}
 		this.paused = paused;
@@ -152,6 +138,7 @@ public class MusicManager {
 
 	public void setLooping(boolean looping) {
 		this.looping = looping;
+		Controller.audioManager.setLooping("music", looping);
 	}
 
 	public boolean isShuffle() {
@@ -173,20 +160,13 @@ public class MusicManager {
 		return isPlaying() && music.get(lastPlayed).equals(trackData);
 	}
 
-	public boolean isAutoPlay() {
-		return autoPlay;
-	}
-
-	public void setAutoPlay(boolean autoPlay) {
-		this.autoPlay = autoPlay;
-	}
-
 	public ObjectArrayList<TrackData> getMusic() {
 		return music;
 	}
 
 	public long getRunTime() {
-		return runTime;
+		if(music.isEmpty()) return 0;
+		return Controller.getAudioManager().getMsPlayed("music");
 	}
 
 	public TrackData getCurrentTrack() {

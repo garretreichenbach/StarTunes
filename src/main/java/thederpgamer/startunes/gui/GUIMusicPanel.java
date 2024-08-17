@@ -1,6 +1,7 @@
 package thederpgamer.startunes.gui;
 
 import api.utils.gui.GUIMenuPanel;
+import org.schema.game.common.data.player.faction.FactionRelation;
 import org.schema.schine.common.language.Lng;
 import org.schema.schine.graphicsengine.core.MouseEvent;
 import org.schema.schine.graphicsengine.forms.gui.*;
@@ -35,7 +36,13 @@ public class GUIMusicPanel extends GUIMenuPanel {
 	private void createMusicTab() {
 		GUIContentPane musicTab = guiWindow.addTab(Lng.str("MUSIC"));
 		musicTab.setTextBoxHeightLast(350);
-		GUIAncor anchor = new GUIAncor(getState(), musicTab.getContent(0).getWidth(), musicTab.getContent(0).getHeight());
+		GUIAncor anchor = new GUIAncor(getState(), getWidth() - 128.0f, 10) {
+			@Override
+			public void draw() {
+				super.draw();
+				setWidth(GUIMusicPanel.this.getWidth() - 78);
+			}
+		};
 		GUIHorizontalProgressBar progressBar = new GUIHorizontalProgressBar(getState(), "Stopped    00:00 / 00:00", anchor) {
 			@Override
 			public void draw() {
@@ -44,9 +51,9 @@ public class GUIMusicPanel extends GUIMenuPanel {
 				int totalSeconds = (int) (musicManager.getCurrentTrack().getDuration() / 1000);
 				String currentTime = String.format("%02d:%02d", currentSeconds / 60, currentSeconds % 60);
 				String duration = String.format("%02d:%02d", totalSeconds / 60, totalSeconds % 60);
-				String text = "Stopped    00:00 / 00:00";
-				if(musicManager.isPaused()) text = "Paused    " + currentTime + " / " + duration;
-				else if(!musicManager.isStopped()) text = "Playing    " + currentTime + " / " + duration;
+				String text = "[Stopped]    00:00 / 00:00";
+				if(musicManager.isPaused()) text = "[Paused] " + musicManager.getCurrentTrack().getName() + "    " + currentTime + " / " + duration;
+				else if(musicManager.isPlaying()) text = "[Playing] " + musicManager.getCurrentTrack().getName() + "    " + currentTime + " / " + duration;
 				this.text = text;
 			}
 
@@ -56,11 +63,12 @@ public class GUIMusicPanel extends GUIMenuPanel {
 				else return (float) musicManager.getRunTime() / musicManager.getCurrentTrack().getDuration();
 			}
 		};
+		progressBar.getColor().set(0.3f, 0.5f, 0.7f, 1.0f);
 		anchor.attach(progressBar);
 		musicTab.getContent(0).attach(anchor);
 
-		musicTab.setTextBoxHeightLast(30);
-		musicTab.addNewTextBox(64);
+		musicTab.setTextBoxHeightLast(28);
+		musicTab.addNewTextBox(50);
 		GUIHorizontalButtonTablePane buttonPane = new GUIHorizontalButtonTablePane(getState(), 3, 2, musicTab.getContent(1));
 		buttonPane.onInit();
 		buttonPane.addButton(0, 0, "<<", GUIHorizontalArea.HButtonColor.PINK, new GUICallback() {
@@ -96,7 +104,7 @@ public class GUIMusicPanel extends GUIMenuPanel {
 
 				@Override
 				public boolean isOccluded() {
-					return !musicManager.isPaused();
+					return false;
 				}
 			}, new GUIActivationCallback() {
 				@Override
@@ -106,7 +114,7 @@ public class GUIMusicPanel extends GUIMenuPanel {
 
 				@Override
 				public boolean isActive(InputState state) {
-					return musicManager.isPaused();
+					return true;
 				}
 			});
 		} else {
@@ -121,7 +129,7 @@ public class GUIMusicPanel extends GUIMenuPanel {
 
 				@Override
 				public boolean isOccluded() {
-					return musicManager.isPaused() || musicManager.getMusic().isEmpty();
+					return false;
 				}
 			}, new GUIActivationCallback() {
 				@Override
@@ -131,7 +139,7 @@ public class GUIMusicPanel extends GUIMenuPanel {
 
 				@Override
 				public boolean isActive(InputState state) {
-					return !musicManager.isPaused() && !musicManager.getMusic().isEmpty();
+					return true;
 				}
 			});
 		}
@@ -231,16 +239,16 @@ public class GUIMusicPanel extends GUIMenuPanel {
 			}
 		});
 		musicTab.getContent(1).attach(buttonPane);
-		musicTab.setTextBoxHeightLast((int) buttonPane.getHeight());
+		musicTab.setTextBoxHeightLast((int) buttonPane.getHeight() + 3);
 
 		musicTab.addNewTextBox(350);
-		MusicScrollableList musicList = new MusicScrollableList(getState(), musicManager, this, musicTab.getContent(2));
+		MusicScrollableList musicList = new MusicScrollableList(getState(), musicManager, musicTab.getContent(2));
 		musicList.onInit();
 		musicTab.getContent(2).attach(musicList);
 	}
 
 	private void createPlaylistsTab() {
-		GUIContentPane playlistsTab = guiWindow.addTab(Lng.str("PLAYLISTS"));
-		playlistsTab.setTextBoxHeightLast(350);
+//		GUIContentPane playlistsTab = guiWindow.addTab(Lng.str("PLAYLISTS"));
+//		playlistsTab.setTextBoxHeightLast(350);
 	}
 }
