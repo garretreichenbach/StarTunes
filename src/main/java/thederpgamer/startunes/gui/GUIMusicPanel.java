@@ -20,9 +20,15 @@ import thederpgamer.startunes.manager.MusicManager;
 public class GUIMusicPanel extends GUIMenuPanel {
 
 	private final MusicManager musicManager;
+	private static GUIMusicPanel instance;
+
+	public static void redraw() {
+		instance.recreateTabs();
+	}
 
 	public GUIMusicPanel(InputState inputState) {
 		super(inputState, "GUI_MUSIC_PANEL", 850, 600);
+		instance = this;
 		musicManager = MusicManager.getManager();
 	}
 
@@ -93,7 +99,7 @@ public class GUIMusicPanel extends GUIMenuPanel {
 			}
 		});
 		if(musicManager.isPaused()) {
-			buttonPane.addButton(1, 0, Lng.str("PLAY"), GUIHorizontalArea.HButtonColor.PINK, new GUICallback() {
+			buttonPane.addButton(1, 0, Lng.str("PLAY"), GUIHorizontalArea.HButtonColor.YELLOW, new GUICallback() {
 				@Override
 				public void callback(GUIElement callingGuiElement, MouseEvent event) {
 					if(event.pressedLeftMouse()) {
@@ -118,7 +124,7 @@ public class GUIMusicPanel extends GUIMenuPanel {
 				}
 			});
 		} else {
-			buttonPane.addButton(1, 0, Lng.str("PAUSE"), GUIHorizontalArea.HButtonColor.PINK, new GUICallback() {
+			buttonPane.addButton(1, 0, Lng.str("PAUSE"), GUIHorizontalArea.HButtonColor.YELLOW, new GUICallback() {
 				@Override
 				public void callback(GUIElement callingGuiElement, MouseEvent event) {
 					if(event.pressedLeftMouse()) {
@@ -191,7 +197,7 @@ public class GUIMusicPanel extends GUIMenuPanel {
 				return true;
 			}
 		});
-		buttonPane.addButton(1, 1, Lng.str("STOP"), GUIHorizontalArea.HButtonColor.RED, new GUICallback() {
+		buttonPane.addButton(1, 1, Lng.str("STOP"), GUIHorizontalArea.HButtonColor.ORANGE, new GUICallback() {
 			@Override
 			public void callback(GUIElement callingGuiElement, MouseEvent event) {
 				if(event.pressedLeftMouse()) musicManager.stop();

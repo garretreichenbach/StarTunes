@@ -6,6 +6,7 @@ import org.schema.schine.sound.pcode.SoundManager;
 import paulscode.sound.SoundSystem;
 import thederpgamer.startunes.StarTunes;
 import thederpgamer.startunes.data.TrackData;
+import thederpgamer.startunes.gui.GUIMusicPanel;
 import thederpgamer.startunes.utils.DataUtils;
 
 import java.io.File;
@@ -56,17 +57,12 @@ public class MusicManager {
 	}
 
 	public void next() {
-		stop();
 		if(music.isEmpty()) return;
 		if(looping) play();
 		else {
-			if(shuffle) {
-				int random = (int) (Math.random() * music.size());
-				play(music.get(random));
-			} else if(lastPlayed < music.size() - 1) {
-				lastPlayed++;
-				play(music.get(lastPlayed));
-			} else play(music.get(0));
+			if(shuffle) play(music.get((int) (Math.random() * music.size())));
+			else if(lastPlayed < music.size() - 1) play(music.get(lastPlayed));
+			else play(music.get(0));
 		}
 	}
 
@@ -92,12 +88,8 @@ public class MusicManager {
 						StarTunes.getInstance().logException(exception.getMessage(), exception);
 					}
 				}
-				try {
-					sleep(1000);
-					next();
-				} catch(InterruptedException exception) {
-					StarTunes.getInstance().logException(exception.getMessage(), exception);
-				}
+				GUIMusicPanel.redraw();
+				if(!isStopped()) next();
 			}
 		}).start();
 	}

@@ -26,9 +26,9 @@ public class SoundManager {
 	private static final int MAX_PLAYER_PER_HUNDRED_MILLI = 4;
 
 	private static final long RESET_SOUND_TIME = 50;
-	private static final float DEFAULT_SOUND_RADIUS = 50f;
-	public static float musicVolume = ((Integer) EngineSettings.S_SOUND_VOLUME_GLOBAL.getCurrentState()).floatValue() / 10f;
-	public static float soundVolume = ((Integer) EngineSettings.S_SOUND_VOLUME_GLOBAL.getCurrentState()).floatValue() / 10f;
+	private static final float DEFAULT_SOUND_RADIUS = 50.0f;
+	public static float musicVolume = ((Integer) EngineSettings.S_SOUND_VOLUME_GLOBAL.getCurrentState()).floatValue() / 10.0f;
+	public static float soundVolume = ((Integer) EngineSettings.S_SOUND_VOLUME_GLOBAL.getCurrentState()).floatValue() / 10.0f;
 	public static boolean errorGotten;
 	/**
 	 * A reference to the sound system.
@@ -37,21 +37,21 @@ public class SoundManager {
 	/**
 	 * Set to true when the SoundManager has been initialised.
 	 */
-	private static boolean loaded = false;
+	private static boolean loaded;
 	private final ObjectArrayList<AudioEntity> currentEntities = new ObjectArrayList<AudioEntity>();
 	private final Vector3f linVelo = new Vector3f();
 	/**
 	 * Sound pool containing sounds.
 	 */
-	private SoundPool soundPoolSounds;
+	private final SoundPool soundPoolSounds;
 	/**
 	 * Sound pool containing streaming audio.
 	 */
-	private SoundPool soundPoolStreaming;
+	private final SoundPool soundPoolStreaming;
 	/**
 	 * Sound pool containing music.
 	 */
-	private SoundPool soundPoolMusic;
+	private final SoundPool soundPoolMusic;
 	/**
 	 * The last ID used when a sound is played, passed into SoundSystem to give
 	 * active sounds a unique ID
@@ -62,15 +62,15 @@ public class SoundManager {
 	private boolean soundVolumeChanged;
 
 	private float bgMusicVolume = 0.18f;
-	private Object2ObjectOpenHashMap<String, PlayedCheck> playedMap = new Object2ObjectOpenHashMap<String, PlayedCheck>();
+	private final Object2ObjectOpenHashMap<String, PlayedCheck> playedMap = new Object2ObjectOpenHashMap<String, PlayedCheck>();
 
 	public SoundManager() {
 		soundPoolSounds = new SoundPool();
 		soundPoolStreaming = new SoundPool();
 		soundPoolMusic = new SoundPool();
 		latestSoundID = 0;
-		musicVolume = ((Integer) EngineSettings.S_SOUND_VOLUME_GLOBAL.getCurrentState()).floatValue() / 10f;
-		soundVolume = ((Integer) EngineSettings.S_SOUND_VOLUME_GLOBAL.getCurrentState()).floatValue() / 10f;
+		musicVolume = ((Integer) EngineSettings.S_SOUND_VOLUME_GLOBAL.getCurrentState()).floatValue() / 10.0f;
+		soundVolume = ((Integer) EngineSettings.S_SOUND_VOLUME_GLOBAL.getCurrentState()).floatValue() / 10.0f;
 	}
 
 	/**
@@ -159,28 +159,24 @@ public class SoundManager {
 	 * Called when one of the sound level options has changed.
 	 */
 	public void onSoundOptionsChanged() {
-		if(!loaded && (getSoundVolume() != 0.0F || getMusicVolume() != 0.0F)) {
+		if(!loaded && (getSoundVolume() != 0.0F || musicVolume != 0.0F)) {
 			tryToSetLibraryAndCodecs();
 		}
 
 		if(loaded) {
-			musicVolume = ((Integer) EngineSettings.S_SOUND_VOLUME_GLOBAL.getCurrentState()).floatValue() / 10f;
-			if(getMusicVolume() == 0.0F || !EngineSettings.S_SOUND_ENABLED.isOn()) {
+			musicVolume = ((Integer) EngineSettings.S_SOUND_VOLUME_GLOBAL.getCurrentState()).floatValue() / 10.0f;
+			if(musicVolume == 0.0F || !EngineSettings.S_SOUND_ENABLED.isOn()) {
 				System.err.println("[CLIENT][SOUND] Sound Disabled");
 				sndSystem.stop("music");
 			} else {
-				System.err.println("[CLIENT][SOUND] Sound Volume Changed to " + getMusicVolume() + " (current background lvl: " + bgMusicVolume + ")");
-				sndSystem.setVolume("music", bgMusicVolume * getMusicVolume());
+				System.err.println("[CLIENT][SOUND] Sound Volume Changed to " + musicVolume + " (current background lvl: " + bgMusicVolume + ")");
+				sndSystem.setVolume("music", bgMusicVolume * musicVolume);
 			}
 		}
 	}
 
 	public long getMsPlayed(String name) {
-		try {
-			return (long) sndSystem.millisecondsPlayed(name);
-		} catch(NullPointerException ignored) {
-			return 0;
-		}
+		return sndSystem.playing(name) ? (long) sndSystem.millisecondsPlayed(name) : 0;
 	}
 
 	public void playBackgroundMusic(String soundName, float volume) {
@@ -191,7 +187,7 @@ public class SoundManager {
 			sndSystem.backgroundMusic("music", soundpoolentry.soundUrl,
 					soundpoolentry.soundName, true);
 			bgMusicVolume = volume;
-			musicVolume = ((Integer) EngineSettings.S_SOUND_VOLUME_GLOBAL.getCurrentState()).floatValue() / 10f;
+			musicVolume = ((Integer) EngineSettings.S_SOUND_VOLUME_GLOBAL.getCurrentState()).floatValue() / 10.0f;
 			System.err.println("BACKGROUND SOUND: " + bgMusicVolume * musicVolume + "; " + bgMusicVolume + "; " + musicVolume);
 			sndSystem.setVolume("music", bgMusicVolume * musicVolume);
 
@@ -200,7 +196,7 @@ public class SoundManager {
 
 	public void playSound(AudioEntity en, String soundName, float volume,
 	                      float pitch) {
-		this.playSound(en, soundName, volume,
+		playSound(en, soundName, volume,
 				pitch, DEFAULT_SOUND_RADIUS);
 	}
 
@@ -233,7 +229,7 @@ public class SoundManager {
 
 	public void playSound(String soundName, float x, float y, float z,
 	                      float volume, float pitch) {
-		this.playSound(soundName, x, y, z,
+		playSound(soundName, x, y, z,
 				volume, pitch, DEFAULT_SOUND_RADIUS);
 	}
 
@@ -279,8 +275,8 @@ public class SoundManager {
 			//					+ x + ", " + y + ", " + z + "; VOL " + volume + "; PITCH "
 			//					+ pitch);
 			latestSoundID = (latestSoundID + 1) % 256;
-			String s = (new StringBuilder()).append("sound_")
-					.append(latestSoundID).toString();
+			String s = "sound_" +
+					latestSoundID;
 
 			if(sndSystem.playing(s)) {
 				sndSystem.setLooping(s, false);
@@ -313,8 +309,8 @@ public class SoundManager {
 		volume *= getSoundVolume();
 		if(soundpoolentry != null) {
 			latestSoundID = (latestSoundID + 1) % 256;
-			String s = (new StringBuilder()).append("sound_")
-					.append(latestSoundID).toString();
+			String s = "sound_" +
+					latestSoundID;
 			sndSystem.newSource(false, s, soundpoolentry.soundUrl,
 					soundpoolentry.soundName, false, 0.0F, 0.0F, 0.0F, 0, 0.0F);
 
@@ -352,9 +348,9 @@ public class SoundManager {
 				sndSystem.stop("music");
 			}
 
-			float f = 16F;
+			float f = 16.0F;
 			sndSystem.newStreamingSource(true, s, soundpoolentry.soundUrl,
-					soundpoolentry.soundName, false, x, y, z, 2, f * 4F);
+					soundpoolentry.soundName, false, x, y, z, 2, f * 4.0F);
 			sndSystem.setVolume(s, 0.5F * getSoundVolume());
 			sndSystem.play(s);
 		}
@@ -369,7 +365,6 @@ public class SoundManager {
 		}
 
 		if(ent == null) {
-			return;
 		} else {
 			// float f = par1EntityLiving.prevRotationYaw +
 			// (par1EntityLiving.rotationYaw - par1EntityLiving.prevRotationYaw)
@@ -409,7 +404,6 @@ public class SoundManager {
 				}
 
 			}
-			return;
 		}
 	}
 
@@ -418,7 +412,7 @@ public class SoundManager {
 			return;
 		}
 
-		for(AudioEntity en : getCurrentEntities()) {
+		for(AudioEntity en : currentEntities) {
 			playSound(en, en.getOutsideSound(), en.getOutsideSoundVolume(),
 					en.getOutsideSoundPitch(), en.getSoundRadius());
 			if(en.isOwnPlayerInside()) {
@@ -443,7 +437,7 @@ public class SoundManager {
 		if(!loaded || getSoundVolume() == 0.0F) {
 			return;
 		}
-		for(AudioEntity en : getCurrentEntities()) {
+		for(AudioEntity en : currentEntities) {
 			sndSystem.stop(en.getUniqueIdentifier());
 		}
 	}
@@ -470,8 +464,8 @@ public class SoundManager {
 		}
 		sndSystem.stop(ent.getUniqueIdentifier());
 		playSound(ent, soundName, volume, pitch);
-		if(!getCurrentEntities().contains(ent)) {
-			getCurrentEntities().add(ent);
+		if(!currentEntities.contains(ent)) {
+			currentEntities.add(ent);
 		}
 	}
 
@@ -492,7 +486,7 @@ public class SoundManager {
 
 		try {
 			float f = getSoundVolume();
-			float f1 = getMusicVolume();
+			float f1 = musicVolume;
 			setMusicVolume(0.0F);
 			setMusicVolume(0.0F);
 			// options.saveOptions();
@@ -526,7 +520,7 @@ public class SoundManager {
 	}
 
 	public void update(Timer timer) {
-		if(!loaded || (getSoundVolume() == 0.0F && !isSoundVolumeChanged())) {
+		if(!loaded || (getSoundVolume() == 0.0F && !soundVolumeChanged)) {
 			return;
 		}
 		for(PlayedCheck e : playedMap.values()) {
@@ -535,7 +529,7 @@ public class SoundManager {
 				e.first = -1;
 			}
 		}
-		if(isSoundVolumeChanged()) {
+		if(soundVolumeChanged) {
 			if(getSoundVolume() == 0) {
 				sndSystem.setMasterVolume(0);
 			} else {
@@ -543,7 +537,7 @@ public class SoundManager {
 				sndSystem.setMasterVolume(getSoundVolume());
 			}
 
-			for(AudioEntity en : getCurrentEntities()) {
+			for(AudioEntity en : currentEntities) {
 
 				System.err.println("[SOUND] adapting sound of " + en.getUniqueIdentifier() + "; volume: " + getSoundVolume());
 				sndSystem.stop(en.getUniqueIdentifier());
@@ -559,7 +553,7 @@ public class SoundManager {
 			setSoundVolumeChanged(false);
 		}
 
-		for(AudioEntity en : getCurrentEntities()) {
+		for(AudioEntity en : currentEntities) {
 
 			sndSystem.setPosition(en.getUniqueIdentifier(),
 					en.getWorldTransformOnClient().origin.x,
@@ -636,7 +630,7 @@ public class SoundManager {
 			if((arg0 != null && arg0.contains("Unable to initialize OpenAL.  Probable cause: OpenAL not supported")) ||
 					(arg1 != null && arg1.contains("Unable to initialize OpenAL.  Probable cause: OpenAL not supported"))) {
 				EngineSettings.S_SOUND_SYS_ENABLED.setCurrentState(false);
-				SoundManager.errorGotten = true;
+				errorGotten = true;
 				System.err.println("[SOUND] ERROR CRITICAL. TURNING SOUND SYS OFF");
 			} else {
 				System.err.println("[SOUND] ERROR NOT CRITICAL. LEAVING SOUND SYS ON");
