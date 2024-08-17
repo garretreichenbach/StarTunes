@@ -2,7 +2,6 @@ package thederpgamer.startunes.gui;
 
 import api.utils.gui.GUIMenuPanel;
 import api.utils.textures.StarLoaderTexture;
-import org.schema.game.common.data.player.faction.FactionRelation;
 import org.schema.schine.common.language.Lng;
 import org.schema.schine.graphicsengine.core.MouseEvent;
 import org.schema.schine.graphicsengine.forms.gui.*;
@@ -20,10 +19,22 @@ import thederpgamer.startunes.manager.MusicManager;
  */
 public class GUIMusicPanel extends GUIMenuPanel {
 
+	private static GUIMusicPanel instance;
+
+	public static void redraw() {
+		StarLoaderTexture.runOnGraphicsThread(new Runnable() {
+			@Override
+			public void run() {
+				if(instance != null) instance.recreateTabs();
+			}
+		});
+	}
+
 	private final MusicManager musicManager;
 
 	public GUIMusicPanel(InputState inputState) {
 		super(inputState, "GUI_MUSIC_PANEL", 850, 600);
+		instance = this;
 		musicManager = MusicManager.getManager();
 	}
 
@@ -48,6 +59,10 @@ public class GUIMusicPanel extends GUIMenuPanel {
 			@Override
 			public void draw() {
 				super.draw();
+				if(musicManager.isStopped() || musicManager.getCurrentTrack() == null) {
+					text = "[Stopped]    00:00 / 00:00";
+					return;
+				}
 				int currentSeconds = (int) (musicManager.getRunTime() / 1000);
 				int totalSeconds = (int) (musicManager.getCurrentTrack().getDuration() / 1000);
 				String currentTime = String.format("%02d:%02d", currentSeconds / 60, currentSeconds % 60);

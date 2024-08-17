@@ -1,19 +1,16 @@
 package thederpgamer.startunes.manager;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import org.schema.schine.graphicsengine.core.Controller;
-import org.schema.schine.graphicsengine.core.settings.EngineSettings;
-import org.schema.schine.sound.pcode.SoundManager;
-import org.schema.schine.sound.pcode.SoundPool;
-import org.schema.schine.sound.pcode.SoundPoolEntry;
-import paulscode.sound.SoundSystem;
 import thederpgamer.startunes.StarTunes;
 import thederpgamer.startunes.data.TrackData;
 import thederpgamer.startunes.gui.GUIMusicPanel;
 import thederpgamer.startunes.utils.DataUtils;
 
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineEvent;
+import javax.sound.sampled.LineListener;
 import java.io.File;
-import java.lang.reflect.Field;
 import java.util.Objects;
 
 /**
@@ -29,6 +26,7 @@ public class MusicManager {
 	private boolean shuffle;
 	private boolean looping;
 	private boolean paused;
+	private Clip clip;
 
 	public static MusicManager getManager() {
 		return manager;
@@ -48,17 +46,6 @@ public class MusicManager {
 		}
 	}
 
-	public static SoundSystem getSoundSystem() {
-		try {
-			Field field = Controller.getAudioManager().getClass().getDeclaredField("sndSystem");
-			field.setAccessible(true);
-			return (SoundSystem) field.get(Controller.getAudioManager());
-		} catch(Exception exception) {
-			StarTunes.getInstance().logException(exception.getMessage(), exception);
-			return null;
-		}
-	}
-
 	public void previous() {
 		if(music.isEmpty()) return;
 		if(lastPlayed > 0) {
@@ -68,17 +55,19 @@ public class MusicManager {
 	}
 
 	public void next() {
-		if(music.isEmpty()) return;
-		if(looping) play();
-		else {
-			if(shuffle) {
-				int random = (int) (Math.random() * music.size());
-				play(music.get(random));
-			} else if(lastPlayed < music.size() - 1) {
-				lastPlayed++;
-				play(music.get(lastPlayed));
-			} else play(music.get(0));
-		}
+		if(music.isEmpty() || isStopped()) return;
+		if(shuffle) {
+			if(music.size() == 1) {
+				play(music.get(0));
+				return;
+			}
+			int random = (int) (Math.random() * music.size());
+			while(random == lastPlayed) random = (int) (Math.random() * music.size());
+			play(music.get(random));
+		} else if(lastPlayed < music.size() - 1) {
+			lastPlayed++;
+			play(music.get(lastPlayed));
+		} else play(music.get(0));
 	}
 
 	public void play() {
@@ -87,36 +76,30 @@ public class MusicManager {
 		else play(music.get(0));
 	}
 
-	public void play(final TrackData trackData) {
+	public void play(TrackData trackData) {
 		if(music.isEmpty()) return;
 		paused = false;
 		stop();
 		lastPlayed = music.indexOf(trackData);
 		try {
-			Field soundPoolField = Controller.audioManager.getClass().getDeclaredField("soundPoolMusic");
-			soundPoolField.setAccessible(true);
-			SoundPool soundPool = (SoundPool) soundPoolField.get(Controller.audioManager);
-			SoundPoolEntry soundpoolentry = soundPool.get(trackData.getName());
-			if(soundpoolentry != null) {
-				getSoundSystem().backgroundMusic("bm", soundpoolentry.soundUrl, soundpoolentry.soundName, false);
-				getSoundSystem().setVolume("bm", 0.18f);
-			}
+			clip = AudioSystem.getClip();
+			clip.open(AudioSystem.getAudioInputStream(trackData.getFile()));
+			clip.addLineListener(new LineListener() {
+				@Override
+				public void update(LineEvent event) {
+					if(event.getType() == LineEvent.Type.STOP) {
+						if(!isStopped()) {
+							if(looping) play();
+							else next();
+						}
+					}
+				}
+			});
+			clip.start();
+			GUIMusicPanel.redraw();
 		} catch(Exception exception) {
 			StarTunes.getInstance().logException(exception.getMessage(), exception);
 		}
-		(new Thread() {
-			@Override
-			public void run() {
-				while(isPlaying(trackData)) {
-					try {
-						sleep(100);
-					} catch(InterruptedException exception) {
-						StarTunes.getInstance().logException(exception.getMessage(), exception);
-					}
-				}
-				if(!isStopped()) next();
-			}
-		}).start();
 	}
 
 	public void play(int index) {
@@ -125,8 +108,15 @@ public class MusicManager {
 	}
 
 	public void stop() {
-		if(music.isEmpty()) return;
-		Objects.requireNonNull(getSoundSystem()).stop("bm");
+		if(music.isEmpty() || clip == null) return;
+		try {
+			clip.stop();
+			clip.close();
+			clip = null;
+			GUIMusicPanel.redraw();
+		} catch(Exception exception) {
+			StarTunes.getInstance().logException(exception.getMessage(), exception);
+		}
 	}
 
 	public boolean isStopped() {
@@ -140,13 +130,15 @@ public class MusicManager {
 	}
 
 	public void setPaused(boolean paused) {
-		if(music.isEmpty()) return;
-		SoundSystem soundSystem = getSoundSystem();
-		if(soundSystem != null) {
-			if(this.paused) soundSystem.play("bm");
-			else soundSystem.pause("bm");
+		if(music.isEmpty() || isStopped()) return;
+		try {
+			if(paused) clip.stop();
+			else clip.start();
+			this.paused = paused;
+			GUIMusicPanel.redraw();
+		} catch(Exception exception) {
+			StarTunes.getInstance().logException(exception.getMessage(), exception);
 		}
-		this.paused = paused;
 	}
 
 	public boolean isLooping() {
@@ -167,9 +159,7 @@ public class MusicManager {
 
 	public boolean isPlaying() {
 		if(music.isEmpty()) return false;
-		SoundSystem soundSystem = getSoundSystem();
-		if(soundSystem != null) return soundSystem.playing("bm");
-		return false;
+		return clip != null && !isPaused();
 	}
 
 	public boolean isPlaying(TrackData trackData) {
@@ -181,12 +171,17 @@ public class MusicManager {
 	}
 
 	public long getRunTime() {
-		if(music.isEmpty()) return 0;
-		return Objects.requireNonNull(getSoundSystem()).playing("bm") ? (long) getSoundSystem().millisecondsPlayed("bm") : 0;
+		if(music.isEmpty() || isStopped()) return 0;
+		try {
+			return clip.getMicrosecondPosition() / 1000;
+		} catch(Exception exception) {
+			StarTunes.getInstance().logException(exception.getMessage(), exception);
+			return 0;
+		}
 	}
 
 	public TrackData getCurrentTrack() {
-		if(music.isEmpty()) return null;
+		if(music.isEmpty() || isStopped()) return null;
 		if(lastPlayed < music.size()) return music.get(lastPlayed);
 		else return music.get(0);
 	}

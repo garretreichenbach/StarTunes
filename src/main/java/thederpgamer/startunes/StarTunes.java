@@ -1,15 +1,9 @@
 package thederpgamer.startunes;
 
 import api.mod.StarMod;
-import org.apache.commons.io.IOUtils;
 import thederpgamer.startunes.manager.ConfigManager;
 import thederpgamer.startunes.manager.EventManager;
 import thederpgamer.startunes.manager.MusicManager;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 /**
  * StarTunes mod main class file.

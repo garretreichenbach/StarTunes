@@ -7,13 +7,10 @@ import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.schema.schine.graphicsengine.core.Controller;
-import org.schema.schine.sound.pcode.SoundPool;
 import thederpgamer.startunes.StarTunes;
 import thederpgamer.startunes.utils.DataUtils;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.util.Locale;
 
 /**
@@ -26,11 +23,13 @@ public class TrackData implements JSONSerializable, Comparable<TrackData> {
 	private String name;
 	private String artist;
 	private long runTime;
+	private File file;
 
-	private TrackData(String name, String artist, int runTime) {
+	private TrackData(String name, String artist, int runTime, File file) {
 		this.name = name;
 		this.artist = artist;
 		this.runTime = runTime;
+		this.file = file;
 	}
 
 	public TrackData(JSONObject data) {
@@ -40,7 +39,7 @@ public class TrackData implements JSONSerializable, Comparable<TrackData> {
 	public static TrackData loadFromFile(File file) {
 		try {
 			String type = file.getName().substring(file.getName().lastIndexOf(".") + 1).toLowerCase(Locale.ENGLISH);
-			if(type.equals("mp3") || type.equals("wav")) {
+			if(type.equals("wav")) {
 				AudioFile audioFile = AudioFileIO.getDefaultAudioFileIO().readFile(file);
 				if(audioFile != null) {
 					String name = getField(audioFile, FieldKey.TITLE);
@@ -49,24 +48,16 @@ public class TrackData implements JSONSerializable, Comparable<TrackData> {
 					int minutes = runTime / 60;
 					int seconds = runTime % 60;
 					runTime = (minutes * 60 + seconds) * 1000;
-					try {
-						Field field = Controller.audioManager.getClass().getDeclaredField("soundPoolMusic");
-						field.setAccessible(true);
-						SoundPool soundPool = (SoundPool) field.get(Controller.audioManager);
-						soundPool.addSound("music", file);
-					} catch(Exception exception) {
-						StarTunes.getInstance().logException(exception.getMessage(), exception);
-					}
-					return loadTrackInfo(name, artist, runTime);
+					return loadTrackInfo(name, artist, runTime, file);
 				}
-			} else throw new IllegalArgumentException("Invalid file type " + type + "\nSupported file types: .mp3, .wav");
+			} else throw new IllegalArgumentException("Invalid file type " + type + "\nSupported file types: .wav");
 		} catch(Exception exception) {
 			StarTunes.getInstance().logException(exception.getMessage(), exception);
 		}
 		return null;
 	}
 
-	private static TrackData loadTrackInfo(String name, String artist, int runTime) {
+	private static TrackData loadTrackInfo(String name, String artist, int runTime, File file) {
 		File trackDataJson = new File(DataUtils.getResourcesPath() + "/music/track_data.json");
 		try {
 			JSONArray data;
@@ -78,7 +69,7 @@ public class TrackData implements JSONSerializable, Comparable<TrackData> {
 				JSONObject trackData = data.getJSONObject(i);
 				if(trackData.getString("name").equals(name) && trackData.getString("artist").equals(artist) && trackData.getInt("runTime") == runTime) return new TrackData(trackData);
 			}
-			TrackData trackData = new TrackData(name, artist, runTime);
+			TrackData trackData = new TrackData(name, artist, runTime, file);
 			data.put(trackData.toJSON());
 			FileUtils.write(trackDataJson, data.toString(), "UTF-8");
 			return trackData;
@@ -91,7 +82,7 @@ public class TrackData implements JSONSerializable, Comparable<TrackData> {
 	private static void checkForEmptyTags(AudioFile audioFile) {
 		Tag tag = audioFile.getTagOrCreateDefault();
 		if(tag.isEmpty() || tag.getFirst(FieldKey.TITLE) == null || tag.getFirst(FieldKey.ARTIST) == null) {
-			String title = audioFile.getFile().getName().substring(0, audioFile.getFile().getName().lastIndexOf("."));
+			String title = audioFile.getFile().getName().substring(0, audioFile.getFile().getName().lastIndexOf('.'));
 			String artist = "Unknown";
 			try {
 				if(tag.isEmpty()) {
@@ -119,6 +110,7 @@ public class TrackData implements JSONSerializable, Comparable<TrackData> {
 		data.put("name", name);
 		data.put("artist", artist);
 		data.put("runTime", runTime);
+		data.put("file", file.getAbsolutePath());
 		return data;
 	}
 
@@ -127,6 +119,7 @@ public class TrackData implements JSONSerializable, Comparable<TrackData> {
 		name = data.getString("name");
 		artist = data.getString("artist");
 		runTime = data.getLong("runTime");
+		file = new File(data.getString("file"));
 	}
 
 	@Override
@@ -144,5 +137,9 @@ public class TrackData implements JSONSerializable, Comparable<TrackData> {
 
 	public long getDuration() {
 		return runTime;
+	}
+
+	public File getFile() {
+		return file;
 	}
 }
