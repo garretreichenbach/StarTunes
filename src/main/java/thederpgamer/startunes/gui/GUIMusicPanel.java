@@ -21,20 +21,9 @@ import thederpgamer.startunes.manager.MusicManager;
 public class GUIMusicPanel extends GUIMenuPanel {
 
 	private final MusicManager musicManager;
-	private static GUIMusicPanel instance;
-
-	public static void redraw() {
-		StarLoaderTexture.runOnGraphicsThread(new Runnable() {
-			@Override
-			public void run() {
-				instance.recreateTabs();
-			}
-		});
-	}
 
 	public GUIMusicPanel(InputState inputState) {
 		super(inputState, "GUI_MUSIC_PANEL", 850, 600);
-		instance = this;
 		musicManager = MusicManager.getManager();
 	}
 

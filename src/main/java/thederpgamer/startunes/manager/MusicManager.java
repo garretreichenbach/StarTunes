@@ -65,12 +65,17 @@ public class MusicManager {
 	}
 
 	public void next() {
+		stop();
 		if(music.isEmpty()) return;
 		if(looping) play();
 		else {
-			if(shuffle) play(music.get((int) (Math.random() * music.size())));
-			else if(lastPlayed < music.size() - 1) play(music.get(lastPlayed));
-			else play(music.get(0));
+			if(shuffle) {
+				int random = (int) (Math.random() * music.size());
+				play(music.get(random));
+			} else if(lastPlayed < music.size() - 1) {
+				lastPlayed++;
+				play(music.get(lastPlayed));
+			} else play(music.get(0));
 		}
 	}
 
@@ -96,8 +101,7 @@ public class MusicManager {
 						StarTunes.getInstance().logException(exception.getMessage(), exception);
 					}
 				}
-				GUIMusicPanel.redraw();
-				if(!isStopped()) next();
+				if(!isStopped() && !isPaused()) next();
 			}
 		}).start();
 	}
@@ -126,8 +130,8 @@ public class MusicManager {
 		if(music.isEmpty()) return;
 		SoundSystem soundSystem = getSoundSystem();
 		if(soundSystem != null) {
-			if(this.paused) soundSystem.play("bm");
-			else soundSystem.pause("bm");
+			if(this.paused) soundSystem.play("music");
+			else soundSystem.pause("music");
 		}
 		this.paused = paused;
 	}
@@ -159,7 +163,7 @@ public class MusicManager {
 	public boolean isPlaying() {
 		if(music.isEmpty()) return false;
 		SoundSystem soundSystem = getSoundSystem();
-		if(soundSystem != null) return soundSystem.playing("bm");
+		if(soundSystem != null) return soundSystem.playing("music");
 		return false;
 	}
 
@@ -173,7 +177,7 @@ public class MusicManager {
 
 	public long getRunTime() {
 		if(music.isEmpty()) return 0;
-		return Objects.requireNonNull(getSoundSystem()).playing("bm") ? (long) getSoundSystem().millisecondsPlayed("bm") : 0;
+		return Objects.requireNonNull(getSoundSystem()).playing("music") ? (long) getSoundSystem().millisecondsPlayed("music") : 0;
 	}
 
 	public TrackData getCurrentTrack() {
