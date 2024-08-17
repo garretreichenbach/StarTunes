@@ -8,10 +8,12 @@ import org.jaudiotagger.tag.Tag;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.schema.schine.graphicsengine.core.Controller;
+import org.schema.schine.sound.pcode.SoundPool;
 import thederpgamer.startunes.StarTunes;
 import thederpgamer.startunes.utils.DataUtils;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.Locale;
 
 /**
@@ -47,7 +49,14 @@ public class TrackData implements JSONSerializable, Comparable<TrackData> {
 					int minutes = runTime / 60;
 					int seconds = runTime % 60;
 					runTime = (minutes * 60 + seconds) * 1000;
-					Controller.audioManager.addMusic(name, file);
+					try {
+						Field field = Controller.audioManager.getClass().getDeclaredField("soundPoolMusic");
+						field.setAccessible(true);
+						SoundPool soundPool = (SoundPool) field.get(Controller.audioManager);
+						soundPool.addSound("music", file);
+					} catch(Exception exception) {
+						StarTunes.getInstance().logException(exception.getMessage(), exception);
+					}
 					return loadTrackInfo(name, artist, runTime);
 				}
 			} else throw new IllegalArgumentException("Invalid file type " + type + "\nSupported file types: .mp3, .wav");

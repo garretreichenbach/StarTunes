@@ -2,7 +2,10 @@ package thederpgamer.startunes.manager;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.schema.schine.graphicsengine.core.Controller;
+import org.schema.schine.graphicsengine.core.settings.EngineSettings;
 import org.schema.schine.sound.pcode.SoundManager;
+import org.schema.schine.sound.pcode.SoundPool;
+import org.schema.schine.sound.pcode.SoundPoolEntry;
 import paulscode.sound.SoundSystem;
 import thederpgamer.startunes.StarTunes;
 import thederpgamer.startunes.data.TrackData;
@@ -65,7 +68,6 @@ public class MusicManager {
 	}
 
 	public void next() {
-		stop();
 		if(music.isEmpty()) return;
 		if(looping) play();
 		else {
@@ -90,7 +92,18 @@ public class MusicManager {
 		paused = false;
 		stop();
 		lastPlayed = music.indexOf(trackData);
-		Controller.audioManager.playBackgroundMusic(trackData.getName(), 0.18f);
+		try {
+			Field soundPoolField = Controller.audioManager.getClass().getDeclaredField("soundPoolMusic");
+			soundPoolField.setAccessible(true);
+			SoundPool soundPool = (SoundPool) soundPoolField.get(Controller.audioManager);
+			SoundPoolEntry soundpoolentry = soundPool.get(trackData.getName());
+			if(soundpoolentry != null) {
+				getSoundSystem().backgroundMusic("bm", soundpoolentry.soundUrl, soundpoolentry.soundName, false);
+				getSoundSystem().setVolume("bm", 0.18f);
+			}
+		} catch(Exception exception) {
+			StarTunes.getInstance().logException(exception.getMessage(), exception);
+		}
 		(new Thread() {
 			@Override
 			public void run() {
@@ -101,7 +114,7 @@ public class MusicManager {
 						StarTunes.getInstance().logException(exception.getMessage(), exception);
 					}
 				}
-				if(!isStopped() && !isPaused()) next();
+				if(!isStopped()) next();
 			}
 		}).start();
 	}
@@ -113,7 +126,7 @@ public class MusicManager {
 
 	public void stop() {
 		if(music.isEmpty()) return;
-		Controller.audioManager.stopBackgroundMusic();
+		Objects.requireNonNull(getSoundSystem()).stop("bm");
 	}
 
 	public boolean isStopped() {
@@ -130,18 +143,10 @@ public class MusicManager {
 		if(music.isEmpty()) return;
 		SoundSystem soundSystem = getSoundSystem();
 		if(soundSystem != null) {
-			if(this.paused) soundSystem.play("music");
-			else soundSystem.pause("music");
+			if(this.paused) soundSystem.play("bm");
+			else soundSystem.pause("bm");
 		}
 		this.paused = paused;
-	}
-
-	public float getVolume() {
-		return Controller.audioManager.getMusicVolume();
-	}
-
-	public void setVolume(float volume) {
-		Controller.audioManager.setMusicVolume(volume);
 	}
 
 	public boolean isLooping() {
@@ -163,7 +168,7 @@ public class MusicManager {
 	public boolean isPlaying() {
 		if(music.isEmpty()) return false;
 		SoundSystem soundSystem = getSoundSystem();
-		if(soundSystem != null) return soundSystem.playing("music");
+		if(soundSystem != null) return soundSystem.playing("bm");
 		return false;
 	}
 
@@ -177,7 +182,7 @@ public class MusicManager {
 
 	public long getRunTime() {
 		if(music.isEmpty()) return 0;
-		return Objects.requireNonNull(getSoundSystem()).playing("music") ? (long) getSoundSystem().millisecondsPlayed("music") : 0;
+		return Objects.requireNonNull(getSoundSystem()).playing("bm") ? (long) getSoundSystem().millisecondsPlayed("bm") : 0;
 	}
 
 	public TrackData getCurrentTrack() {
