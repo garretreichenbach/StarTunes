@@ -453,7 +453,7 @@ public class SoundManager {
 			return;
 		}
 		sndSystem.stop("music");
-
+		sndSystem.removeSource("music");
 	}
 
 	public void stopEntitySound(AudioEntity en) {

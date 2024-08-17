@@ -57,13 +57,17 @@ public class MusicManager {
 
 	public void next() {
 		if(music.isEmpty()) return;
-		if(shuffle) {
-			int random = (int) (Math.random() * music.size());
-			play(music.get(random));
-		} else if(lastPlayed < music.size() - 1) {
-			lastPlayed++;
-			play(music.get(lastPlayed));
-		} else play(music.get(0));
+		stop();
+		if(looping) play();
+		else {
+			if(shuffle) {
+				int random = (int) (Math.random() * music.size());
+				play(music.get(random));
+			} else if(lastPlayed < music.size() - 1) {
+				lastPlayed++;
+				play(music.get(lastPlayed));
+			} else play(music.get(0));
+		}
 	}
 
 	public void play() {
@@ -88,7 +92,6 @@ public class MusicManager {
 						StarTunes.getInstance().logException(exception.getMessage(), exception);
 					}
 				}
-				next();
 			}
 		}).start();
 	}
@@ -100,7 +103,6 @@ public class MusicManager {
 
 	public void stop() {
 		if(music.isEmpty()) return;
-		Controller.audioManager.rewind("music");
 		Controller.audioManager.stopBackgroundMusic();
 	}
 
@@ -138,7 +140,6 @@ public class MusicManager {
 
 	public void setLooping(boolean looping) {
 		this.looping = looping;
-		Controller.audioManager.setLooping("music", looping);
 	}
 
 	public boolean isShuffle() {
