@@ -28,8 +28,6 @@ public class StarTunes extends StarMod {
 	}
 	public static void main(String[] args) {}
 
-	private final String[] overwriteClasses = {"SoundManager"};
-
 	@Override
 	public void onEnable() {
 		super.onEnable();
@@ -40,32 +38,8 @@ public class StarTunes extends StarMod {
 	}
 
 	@Override
-	public byte[] onClassTransform(String className, byte[] byteCode) {
-		for(String name : overwriteClasses) if(className.endsWith(name)) return overwriteClass(className, byteCode);
-		return super.onClassTransform(className, byteCode);
-	}
-
-	@Override
 	public void logException(String message, Exception exception) {
 		super.logException(message, exception);
 		exception.printStackTrace();
 	}
-
-	private byte[] overwriteClass(String className, byte[] byteCode) {
-		byte[] bytes = null;
-		try {
-			ZipInputStream file = new ZipInputStream(Files.newInputStream(getSkeleton().getJarFile().toPath()));
-			while(true) {
-				ZipEntry nextEntry = file.getNextEntry();
-				if(nextEntry == null) break;
-				if(nextEntry.getName().endsWith(className + ".class")) bytes = IOUtils.toByteArray(file);
-			}
-			file.close();
-		} catch(IOException exception) {
-			exception.printStackTrace();
-		}
-		if(bytes != null) return bytes;
-		else return byteCode;
-	}
-
 }

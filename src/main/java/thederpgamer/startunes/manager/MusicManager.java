@@ -10,6 +10,7 @@ import thederpgamer.startunes.gui.GUIMusicPanel;
 import thederpgamer.startunes.utils.DataUtils;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.Objects;
 
 /**
@@ -45,7 +46,14 @@ public class MusicManager {
 	}
 
 	public static SoundSystem getSoundSystem() {
-		return SoundManager.sndSystem;
+		try {
+			Field field = Controller.getAudioManager().getClass().getDeclaredField("soundSystem");
+			field.setAccessible(true);
+			return (SoundSystem) field.get(Controller.getAudioManager());
+		} catch(Exception exception) {
+			StarTunes.getInstance().logException(exception.getMessage(), exception);
+			return null;
+		}
 	}
 
 	public void previous() {
@@ -165,7 +173,7 @@ public class MusicManager {
 
 	public long getRunTime() {
 		if(music.isEmpty()) return 0;
-		return Controller.getAudioManager().getMsPlayed("music");
+		return getSoundSystem().playing("music") ? (long) getSoundSystem().millisecondsPlayed("music") : 0;
 	}
 
 	public TrackData getCurrentTrack() {

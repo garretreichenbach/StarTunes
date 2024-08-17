@@ -2,9 +2,9 @@
   "name": "StarTunes",
   "author": "TheDerpGamer",
   "description": "Adds an in-game music player.",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "starmade_version": "0.203.164",
-  "client_mod": false,
+  "client_mod": true,
   "server_mod": false,
   "main_class": "thederpgamer.startunes.StarTunes",
   "smd_resource_id": 8366,
@@ -12,6 +12,6 @@
     -1
   ],
   "core_mod": false,
-  "requires_class_resize": true,
-  "hard_load_all_classes": true
+  "requires_class_resize": false,
+  "hard_load_all_classes": false
 }
