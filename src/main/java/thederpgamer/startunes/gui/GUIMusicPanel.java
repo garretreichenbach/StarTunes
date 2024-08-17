@@ -1,6 +1,7 @@
 package thederpgamer.startunes.gui;
 
 import api.utils.gui.GUIMenuPanel;
+import api.utils.textures.StarLoaderTexture;
 import org.schema.game.common.data.player.faction.FactionRelation;
 import org.schema.schine.common.language.Lng;
 import org.schema.schine.graphicsengine.core.MouseEvent;
@@ -23,7 +24,12 @@ public class GUIMusicPanel extends GUIMenuPanel {
 	private static GUIMusicPanel instance;
 
 	public static void redraw() {
-		instance.recreateTabs();
+		StarLoaderTexture.runOnGraphicsThread(new Runnable() {
+			@Override
+			public void run() {
+				instance.recreateTabs();
+			}
+		});
 	}
 
 	public GUIMusicPanel(InputState inputState) {

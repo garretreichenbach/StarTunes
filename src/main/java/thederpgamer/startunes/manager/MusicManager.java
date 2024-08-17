@@ -47,7 +47,7 @@ public class MusicManager {
 
 	public static SoundSystem getSoundSystem() {
 		try {
-			Field field = Controller.getAudioManager().getClass().getDeclaredField("soundSystem");
+			Field field = Controller.getAudioManager().getClass().getDeclaredField("sndSystem");
 			field.setAccessible(true);
 			return (SoundSystem) field.get(Controller.getAudioManager());
 		} catch(Exception exception) {
@@ -126,8 +126,8 @@ public class MusicManager {
 		if(music.isEmpty()) return;
 		SoundSystem soundSystem = getSoundSystem();
 		if(soundSystem != null) {
-			if(this.paused) soundSystem.play("music");
-			else soundSystem.pause("music");
+			if(this.paused) soundSystem.play("bm");
+			else soundSystem.pause("bm");
 		}
 		this.paused = paused;
 	}
@@ -159,7 +159,7 @@ public class MusicManager {
 	public boolean isPlaying() {
 		if(music.isEmpty()) return false;
 		SoundSystem soundSystem = getSoundSystem();
-		if(soundSystem != null) return soundSystem.playing("music");
+		if(soundSystem != null) return soundSystem.playing("bm");
 		return false;
 	}
 
@@ -173,7 +173,7 @@ public class MusicManager {
 
 	public long getRunTime() {
 		if(music.isEmpty()) return 0;
-		return getSoundSystem().playing("music") ? (long) getSoundSystem().millisecondsPlayed("music") : 0;
+		return Objects.requireNonNull(getSoundSystem()).playing("bm") ? (long) getSoundSystem().millisecondsPlayed("bm") : 0;
 	}
 
 	public TrackData getCurrentTrack() {
