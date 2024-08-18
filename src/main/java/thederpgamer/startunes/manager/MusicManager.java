@@ -88,7 +88,7 @@ public class MusicManager {
 				@Override
 				public void update(LineEvent event) {
 					if(event.getType() == LineEvent.Type.STOP) {
-						if(!isStopped()) {
+						if(!isStopped() && !isPaused()) {
 							if(looping) play();
 							else next();
 						}
@@ -111,7 +111,6 @@ public class MusicManager {
 		if(music.isEmpty() || clip == null) return;
 		try {
 			clip.stop();
-			clip.close();
 			clip = null;
 			GUIMusicPanel.redraw();
 		} catch(Exception exception) {
@@ -121,7 +120,7 @@ public class MusicManager {
 
 	public boolean isStopped() {
 		if(music.isEmpty()) return true;
-		return !isPlaying();
+		return !isPlaying() && !isPaused();
 	}
 
 	public boolean isPaused() {
@@ -171,7 +170,7 @@ public class MusicManager {
 	}
 
 	public long getRunTime() {
-		if(music.isEmpty() || isStopped()) return 0;
+		if(music.isEmpty() || isStopped() || clip == null) return 0;
 		try {
 			return clip.getMicrosecondPosition() / 1000;
 		} catch(Exception exception) {
