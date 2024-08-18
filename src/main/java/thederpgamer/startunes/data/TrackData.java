@@ -8,9 +8,15 @@ import org.jaudiotagger.tag.Tag;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import thederpgamer.startunes.StarTunes;
+import thederpgamer.startunes.data.handler.MP3Converter;
+import thederpgamer.startunes.data.handler.MediaConverter;
+import thederpgamer.startunes.data.handler.SpotifyConverter;
 import thederpgamer.startunes.utils.DataUtils;
 
 import java.io.File;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Locale;
 
 /**
@@ -23,13 +29,13 @@ public class TrackData implements JSONSerializable, Comparable<TrackData> {
 	private String name;
 	private String artist;
 	private long runTime;
-	private File file;
+	private ContentType contentType;
 
-	private TrackData(String name, String artist, int runTime, File file) {
+	private TrackData(String name, String artist, int runTime, ContentType contentType) {
 		this.name = name;
 		this.artist = artist;
 		this.runTime = runTime;
-		this.file = file;
+		this.contentType = contentType;
 	}
 
 	public TrackData(JSONObject data) {
@@ -39,7 +45,7 @@ public class TrackData implements JSONSerializable, Comparable<TrackData> {
 	public static TrackData loadFromFile(File file) {
 		try {
 			String type = file.getName().substring(file.getName().lastIndexOf(".") + 1).toLowerCase(Locale.ENGLISH);
-			if(type.equals("wav")) {
+			if(type.equals("wav") || type.equals("mp3")) {
 				AudioFile audioFile = AudioFileIO.getDefaultAudioFileIO().readFile(file);
 				if(audioFile != null) {
 					String name = getField(audioFile, FieldKey.TITLE);
@@ -50,7 +56,7 @@ public class TrackData implements JSONSerializable, Comparable<TrackData> {
 					runTime = (minutes * 60 + seconds) * 1000;
 					return loadTrackInfo(name, artist, runTime, file);
 				}
-			} else throw new IllegalArgumentException("Invalid file type " + type + "\nSupported file types: .wav");
+			} else throw new IllegalArgumentException("Invalid file type " + type + "\nSupported file types: .wav, .mp3");
 		} catch(Exception exception) {
 			StarTunes.getInstance().logException(exception.getMessage(), exception);
 		}
@@ -69,7 +75,7 @@ public class TrackData implements JSONSerializable, Comparable<TrackData> {
 				JSONObject trackData = data.getJSONObject(i);
 				if(trackData.getString("name").equals(name) && trackData.getString("artist").equals(artist) && trackData.getInt("runTime") == runTime) return new TrackData(trackData);
 			}
-			TrackData trackData = new TrackData(name, artist, runTime, file);
+			TrackData trackData = new TrackData(name, artist, runTime, ContentType.getType(file));
 			data.put(trackData.toJSON());
 			FileUtils.write(trackDataJson, data.toString(), "UTF-8");
 			return trackData;
@@ -110,7 +116,7 @@ public class TrackData implements JSONSerializable, Comparable<TrackData> {
 		data.put("name", name);
 		data.put("artist", artist);
 		data.put("runTime", runTime);
-		data.put("file", file.getAbsolutePath());
+		data.put("contentType", contentType.name());
 		return data;
 	}
 
@@ -119,7 +125,24 @@ public class TrackData implements JSONSerializable, Comparable<TrackData> {
 		name = data.getString("name");
 		artist = data.getString("artist");
 		runTime = data.getLong("runTime");
-		file = new File(data.getString("file"));
+		if(!data.has("contentType")) {
+			contentType = ContentType.WAV;
+			data.put("contentType", contentType.name());
+			File trackDataJson = new File(DataUtils.getResourcesPath() + "/music/track_data.json");
+			try {
+				JSONArray dataArray = new JSONArray(FileUtils.readFileToString(trackDataJson, "UTF-8"));
+				for(int i = 0; i < dataArray.length(); i++) {
+					JSONObject trackData = dataArray.getJSONObject(i);
+					if(trackData.getString("name").equals(name) && trackData.getString("artist").equals(artist) && trackData.getInt("runTime") == runTime) {
+						dataArray.put(i, data);
+						FileUtils.write(trackDataJson, dataArray.toString(), "UTF-8");
+						break;
+					}
+				}
+			} catch(Exception exception) {
+				StarTunes.getInstance().logException(exception.getMessage(), exception);
+			}
+		} else contentType = ContentType.valueOf(data.getString("contentType"));
 	}
 
 	@Override
@@ -139,7 +162,36 @@ public class TrackData implements JSONSerializable, Comparable<TrackData> {
 		return runTime;
 	}
 
-	public File getFile() {
-		return file;
+	public ContentType getContentType() {
+		return contentType;
+	}
+
+	public enum ContentType {
+		WAV(null),
+		MP3(MP3Converter.class),
+		SPOTIFY(SpotifyConverter.class);
+
+		private final Class<? extends MediaConverter> converter;
+
+		ContentType(Class<? extends MediaConverter> converter) {
+			this.converter = converter;
+		}
+
+		public static ContentType getType(File file) {
+			String type = file.getName().substring(file.getName().lastIndexOf(".") + 1).toLowerCase(Locale.ENGLISH);
+			if(type.equals("wav")) return WAV;
+			else if(type.equals("mp3")) return MP3;
+			else return null;
+		}
+
+		public InputStream createStream(TrackData trackData) {
+			try {
+				if(this == WAV) return Files.newInputStream(Paths.get(DataUtils.getResourcesPath() + "/music/" + trackData.getName() + ".wav"));
+				else return converter.newInstance().createStream(trackData);
+			} catch(Exception exception) {
+				StarTunes.getInstance().logException(exception.getMessage(), exception);
+				return null;
+			}
+		}
 	}
 }

@@ -13,7 +13,7 @@ def starmadeDirectory = 'C:/Program Files (x86)/Steam/steamapps/common/StarMade/
 def jarName = 'StarTunes'
 mainClassName = 'thederpgamer.startunes.StarTunes'
 group 'thederpgamer.startunes'
-version '2.0.3'
+version '2.1.0'
 
 repositories {
     mavenCentral()
@@ -25,6 +25,7 @@ dependencies {
     implementation(fileTree(dir: (starmadeDirectory + "lib"), include: "*.jar"))
     implementation(fileTree(dir: ("lib"), include: "*.jar"))
     implementation group: 'org', name: 'jaudiotagger', version: '2.0.3'
+    implementation 'se.michaelthelin.spotify:spotify-web-api-java:8.4.1'
 }
 
 compileJava.options.encoding = 'UTF-8'

@@ -43,6 +43,7 @@ public class GUIMusicPanel extends GUIMenuPanel {
 		if(!guiWindow.getTabs().isEmpty()) guiWindow.clearTabs();
 		createMusicTab();
 		createPlaylistsTab();
+		createStreamingTab();
 	}
 
 	private void createMusicTab() {
@@ -264,7 +265,12 @@ public class GUIMusicPanel extends GUIMenuPanel {
 	}
 
 	private void createPlaylistsTab() {
-//		GUIContentPane playlistsTab = guiWindow.addTab(Lng.str("PLAYLISTS"));
-//		playlistsTab.setTextBoxHeightLast(350);
+		GUIContentPane playlistsTab = guiWindow.addTab(Lng.str("PLAYLISTS"));
+		playlistsTab.setTextBoxHeightLast(350);
+	}
+
+	private void createStreamingTab() {
+		GUIContentPane streamingTab = guiWindow.addTab(Lng.str("STREAMING"));
+		streamingTab.setTextBoxHeightLast(350);
 	}
 }

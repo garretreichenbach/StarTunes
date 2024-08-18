@@ -11,6 +11,7 @@ import javax.sound.sampled.Clip;
 import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineListener;
 import java.io.File;
+import java.io.InputStream;
 import java.util.Objects;
 
 /**
@@ -83,7 +84,8 @@ public class MusicManager {
 		lastPlayed = music.indexOf(trackData);
 		try {
 			clip = AudioSystem.getClip();
-			clip.open(AudioSystem.getAudioInputStream(trackData.getFile()));
+			InputStream inputStream = trackData.getContentType().createStream(trackData);
+			clip.open(AudioSystem.getAudioInputStream(inputStream));
 			clip.addLineListener(new LineListener() {
 				@Override
 				public void update(LineEvent event) {
